@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 import UploadForm from '../components/UploadForm';
@@ -8,7 +8,6 @@ import SearchBar from '../components/SearchBar';
 import RequestForm from '../components/RequestForm';
 import RequestCard from '../components/RequestCard';
 import Reports from './Reports';
-import API_URL from '../config/api';
 
 const Home = () => {
   const { user } = useContext(AuthContext);
@@ -64,7 +63,7 @@ const Home = () => {
 
   const fetchMaterials = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/materials`);
+      const res = await axiosInstance.get('/api/materials');
       setMaterials(res.data);
       setFilteredMaterials(res.data);
     } catch (err) {
@@ -74,7 +73,7 @@ const Home = () => {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/requests`);
+      const res = await axiosInstance.get('/api/requests');
       setRequests(res.data);
     } catch (err) {
       console.error(err);
@@ -83,10 +82,7 @@ const Home = () => {
 
   const fetchPendingMaterials = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/materials/pending/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/api/materials/pending/all');
       setPendingMaterials(res.data);
     } catch (err) {
       console.error(err);

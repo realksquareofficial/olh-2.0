@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_URL from '../config/api';
-
+import axiosInstance from '../utils/axios';
 
 const Notifications = ({ show, onClose }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     if (show) {
@@ -14,13 +11,9 @@ const Notifications = ({ show, onClose }) => {
     }
   }, [show]);
 
-
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.get(`${API_URL}/api/notifications`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data } = await axiosInstance.get('/api/notifications');
       setNotifications(data);
       setLoading(false);
     } catch (error) {
@@ -29,13 +22,9 @@ const Notifications = ({ show, onClose }) => {
     }
   };
 
-
   const markAsRead = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/api/notifications/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.patch(`/api/notifications/${id}/read`, {});
       setNotifications(notifications.map(n => 
         n._id === id ? { ...n, read: true } : n
       ));
@@ -44,22 +33,16 @@ const Notifications = ({ show, onClose }) => {
     }
   };
 
-
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/api/notifications/mark-all-read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.patch('/api/notifications/mark-all-read', {});
       setNotifications(notifications.map(n => ({ ...n, read: true })));
     } catch (error) {
       console.error(error);
     }
   };
 
-
   if (!show) return null;
-
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20">
@@ -75,7 +58,6 @@ const Notifications = ({ show, onClose }) => {
           </button>
         </div>
 
-
         {notifications.length > 0 && (
           <div className="p-3 border-b border-gray-200 dark:border-gray-700">
             <button
@@ -86,7 +68,6 @@ const Notifications = ({ show, onClose }) => {
             </button>
           </div>
         )}
-
 
         <div className="overflow-y-auto max-h-[500px]">
           {loading ? (
@@ -150,6 +131,5 @@ const Notifications = ({ show, onClose }) => {
     </div>
   );
 };
-
 
 export default Notifications;

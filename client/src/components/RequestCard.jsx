@@ -1,15 +1,12 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
-
 
 const RequestCard = ({ request, onUpdate }) => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
 
   const formatDate = (date) => {
     const now = new Date();
@@ -19,7 +16,6 @@ const RequestCard = ({ request, onUpdate }) => {
     const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
     const diffMinutes = Math.floor(diffTime / (1000 * 60));
 
-
     if (diffMinutes < 60) return `${diffMinutes}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 0) return 'Today';
@@ -27,7 +23,6 @@ const RequestCard = ({ request, onUpdate }) => {
     if (diffDays < 7) return `${diffDays}d ago`;
     return uploaded.toLocaleDateString();
   };
-
 
   const getTypeEmoji = (type) => {
     switch(type) {
@@ -39,13 +34,11 @@ const RequestCard = ({ request, onUpdate }) => {
     }
   };
 
-
   const getRoleBadge = (role) => {
     if (role === 'master') return '👑';
     if (role === 'admin') return '⚡';
     return '';
   };
-
 
   const handleProvide = () => {
     if (!user) {
@@ -55,13 +48,9 @@ const RequestCard = ({ request, onUpdate }) => {
     navigate('/', { state: { fulfillRequestId: request._id, requestSubject: request.subject } });
   };
 
-
   const handleDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/requests/${request._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/api/requests/${request._id}`);
       alert('Request deleted! 🗑️');
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -70,13 +59,9 @@ const RequestCard = ({ request, onUpdate }) => {
     }
   };
 
-
   const handleClose = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/api/requests/${request._id}/close`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.patch(`/api/requests/${request._id}/close`, {});
       alert('Request closed! ✅');
       if (onUpdate) onUpdate();
     } catch (err) {
@@ -85,9 +70,7 @@ const RequestCard = ({ request, onUpdate }) => {
     }
   };
 
-
   const isOwner = user && request.requestedBy?._id === user.id;
-
 
   return (
     <>
@@ -97,7 +80,6 @@ const RequestCard = ({ request, onUpdate }) => {
             REQUEST
           </span>
         </div>
-
 
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -118,7 +100,6 @@ const RequestCard = ({ request, onUpdate }) => {
           </div>
         </div>
 
-
         <div className="p-4">
           <div className="flex items-start gap-2 mb-2">
             <span className="text-2xl">{getTypeEmoji(request.materialType)}</span>
@@ -127,11 +108,9 @@ const RequestCard = ({ request, onUpdate }) => {
             </h3>
           </div>
 
-
           <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm">
             {request.description}
           </p>
-
 
           <div className="flex flex-wrap gap-2 mb-4">
             {request.materialType !== 'other' && (
@@ -146,7 +125,6 @@ const RequestCard = ({ request, onUpdate }) => {
             )}
           </div>
 
-
           {request.status === 'open' && (
             <button
               onClick={handleProvide}
@@ -155,7 +133,6 @@ const RequestCard = ({ request, onUpdate }) => {
               🤝 Provide Material
             </button>
           )}
-
 
           {isOwner && request.status === 'open' && (
             <div className="flex gap-2 mt-3">
@@ -174,7 +151,6 @@ const RequestCard = ({ request, onUpdate }) => {
             </div>
           )}
 
-
           {request.status !== 'open' && (
             <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-center">
               <span className="text-gray-600 dark:text-gray-400 font-semibold">
@@ -184,7 +160,6 @@ const RequestCard = ({ request, onUpdate }) => {
           )}
         </div>
       </div>
-
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -215,6 +190,5 @@ const RequestCard = ({ request, onUpdate }) => {
     </>
   );
 };
-
 
 export default RequestCard;

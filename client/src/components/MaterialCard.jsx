@@ -1,8 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axios';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
-
 
 const MaterialCard = ({ material, onUpdate }) => {
   const { user } = useContext(AuthContext);
@@ -16,22 +15,18 @@ const MaterialCard = ({ material, onUpdate }) => {
   const [rejectReason, setRejectReason] = useState('');
   const [hasVoted, setHasVoted] = useState(false);
 
-
   const isOwnMaterial = user && material.uploadedBy?._id === user.id;
   const isAdmin = user && ['admin', 'master'].includes(user.role);
-
 
   const userVote = material.votes?.find(v => v.user === user?.id);
   const hasUpvoted = userVote?.voteType === 'upvote';
   const hasDownvoted = userVote?.voteType === 'downvote';
-
 
   useEffect(() => {
     if (user) {
       setIsFavorited(material.favorites?.includes(user.id) || false);
     }
   }, [material, user]);
-
 
   useEffect(() => {
     if (user && Array.isArray(material.votes)) {
@@ -43,7 +38,6 @@ const MaterialCard = ({ material, onUpdate }) => {
       setHasVoted(false);
     }
   }, [material, user]);
-
 
   const handleVote = async (voteType) => {
     if (!user) {
@@ -59,21 +53,17 @@ const MaterialCard = ({ material, onUpdate }) => {
       return;
     }
 
-
     setPendingVote(voteType);
     setShowVoteDialog(true);
   };
-
 
   const confirmVote = async () => {
     if (!pendingVote) return;
     
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.post(
-        `${API_URL}/api/materials/${material._id}/vote`,
-        { voteType: pendingVote },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await axiosInstance.post(
+        `/api/materials/${material._id}/vote`,
+        { voteType: pendingVote }
       );
       console.log('Vote response:', data);
       console.log('Votes array:', data.votes);
@@ -90,18 +80,15 @@ const MaterialCard = ({ material, onUpdate }) => {
     }
   };
 
-
   const handleFavorite = async () => {
     if (!user) {
       alert('Please login to favorite');
       return;
     }
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.post(
-        `${API_URL}/api/materials/${material._id}/favorite`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await axiosInstance.post(
+        `/api/materials/${material._id}/favorite`,
+        {}
       );
       onUpdate(data);
     } catch (error) {
@@ -109,18 +96,15 @@ const MaterialCard = ({ material, onUpdate }) => {
     }
   };
 
-
   const handleReport = async () => {
     if (!reportReason.trim()) {
       alert('Please provide a reason for reporting');
       return;
     }
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${API_URL}/api/materials/${material._id}/report`,
-        { reason: reportReason },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await axiosInstance.post(
+        `/api/materials/${material._id}/report`,
+        { reason: reportReason }
       );
       alert('Report submitted successfully');
       setShowReportDialog(false);
@@ -131,14 +115,11 @@ const MaterialCard = ({ material, onUpdate }) => {
     }
   };
 
-
   const handleApprove = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.patch(
-        `${API_URL}/api/materials/${material._id}/approve`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await axiosInstance.patch(
+        `/api/materials/${material._id}/approve`,
+        {}
       );
       onUpdate(data);
     } catch (error) {
@@ -146,18 +127,15 @@ const MaterialCard = ({ material, onUpdate }) => {
     }
   };
 
-
   const confirmReject = async () => {
     if (!rejectReason.trim()) {
       alert('Please provide a reason for rejection');
       return;
     }
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `${API_URL}/api/materials/${material._id}/reject`,
-        { reason: rejectReason },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await axiosInstance.patch(
+        `/api/materials/${material._id}/reject`,
+        { reason: rejectReason }
       );
       onUpdate(null);
       setShowRejectDialog(false);
@@ -168,13 +146,9 @@ const MaterialCard = ({ material, onUpdate }) => {
     }
   };
 
-
   const confirmDelete = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/materials/${material._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/api/materials/${material._id}`);
       onUpdate(null);
       setShowDeleteDialog(false);
     } catch (error) {
@@ -182,7 +156,6 @@ const MaterialCard = ({ material, onUpdate }) => {
       alert('Failed to delete material');
     }
   };
-
 
   return (
     <div className="bg-white dark:bg-gray-800 olh-theme:bg-white olh-theme:border-2 olh-theme:border-olh-primary rounded-lg shadow-md p-6 relative">
@@ -196,7 +169,6 @@ const MaterialCard = ({ material, onUpdate }) => {
         </span>
       </div>
 
-
       {material.linkedRequest && (
         <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 olh-theme:bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-700 dark:text-blue-300 olh-theme:text-blue-700">
@@ -204,7 +176,6 @@ const MaterialCard = ({ material, onUpdate }) => {
           </p>
         </div>
       )}
-
 
       <h3 className="text-xl font-bold mb-2 dark:text-white olh-theme:text-gray-900 pr-24">{material.title}</h3>
       <p className="text-gray-600 dark:text-gray-300 olh-theme:text-gray-700 mb-2 font-semibold">{material.subject}</p>
@@ -222,16 +193,13 @@ const MaterialCard = ({ material, onUpdate }) => {
         </span>
       </div>
 
-
       <p className="text-sm text-gray-500 dark:text-gray-400 olh-theme:text-gray-600 mb-2">
         Uploaded by: {material.uploadedBy?.username || 'Unknown'}
       </p>
 
-
       <p className="text-sm text-gray-500 dark:text-gray-400 olh-theme:text-gray-600 mb-4">
         Views: {material.views || 0} | Trust Score: {material.trustScore || 0}
       </p>
-
 
       <div className="flex gap-3 mb-4">
         <a
@@ -249,7 +217,6 @@ const MaterialCard = ({ material, onUpdate }) => {
           ⬇️ Download
         </a>
       </div>
-
 
       {material.verificationStatus === 'approved' && (
         <div className="mt-4">
@@ -274,7 +241,6 @@ const MaterialCard = ({ material, onUpdate }) => {
             </button>
           </div>
 
-
           <div className="flex items-center gap-4">
             <button
               onClick={() => handleVote('upvote')}
@@ -296,7 +262,6 @@ const MaterialCard = ({ material, onUpdate }) => {
             >
               <span className="text-xl">👍</span>
             </button>
-
 
             <button
               onClick={() => handleVote('downvote')}
@@ -322,7 +287,6 @@ const MaterialCard = ({ material, onUpdate }) => {
         </div>
       )}
 
-
       {material.verificationStatus === 'pending' && isAdmin && (
         <div className="flex gap-2 mt-4">
           <button
@@ -340,7 +304,6 @@ const MaterialCard = ({ material, onUpdate }) => {
         </div>
       )}
 
-
       {user && (isAdmin || isOwnMaterial) && (
         <button
           onClick={() => setShowDeleteDialog(true)}
@@ -349,7 +312,6 @@ const MaterialCard = ({ material, onUpdate }) => {
           🗑️ Delete
         </button>
       )}
-
 
       {showVoteDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -387,7 +349,6 @@ const MaterialCard = ({ material, onUpdate }) => {
         </div>
       )}
 
-
       {showReportDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 olh-theme:bg-white p-6 rounded-lg max-w-md w-full">
@@ -417,7 +378,6 @@ const MaterialCard = ({ material, onUpdate }) => {
         </div>
       )}
 
-
       {showDeleteDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 olh-theme:bg-white p-8 rounded-2xl max-w-md w-full shadow-2xl border-2 border-red-500 dark:border-red-400 animate-fade-in">
@@ -436,7 +396,6 @@ const MaterialCard = ({ material, onUpdate }) => {
               </p>
             </div>
 
-
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteDialog(false)}
@@ -454,7 +413,6 @@ const MaterialCard = ({ material, onUpdate }) => {
           </div>
         </div>
       )}
-
 
       {showRejectDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -476,13 +434,11 @@ const MaterialCard = ({ material, onUpdate }) => {
               rows="4"
             />
 
-
             <div className="bg-yellow-50 dark:bg-yellow-900/20 olh-theme:bg-yellow-50 border-2 border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-6">
               <p className="text-sm text-yellow-800 dark:text-yellow-300 olh-theme:text-yellow-800">
                 💬 The uploader will be notified with this reason
               </p>
             </div>
-
 
             <div className="flex gap-3">
               <button
@@ -507,6 +463,5 @@ const MaterialCard = ({ material, onUpdate }) => {
     </div>
   );
 };
-
 
 export default MaterialCard;

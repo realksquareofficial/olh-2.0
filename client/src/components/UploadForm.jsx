@@ -1,8 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
-
 
 const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
   const { user } = useContext(AuthContext);
@@ -22,9 +20,7 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
   const [message, setMessage] = useState('');
   const [uploadedMaterial, setUploadedMaterial] = useState(null);
 
-
   const isAdmin = user && ['admin', 'master'].includes(user.role);
-
 
   useEffect(() => {
     if (linkedRequest) {
@@ -37,7 +33,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
       });
     }
   }, [linkedRequest]);
-
 
   const validateFile = (file) => {
     const allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'];
@@ -63,7 +58,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
     return { valid: true };
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
@@ -71,15 +65,12 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
       return;
     }
 
-
     const validation = validateFile(file);
     if (!validation.valid) {
       setMessage(validation.message);
       return;
     }
 
-
-    const token = localStorage.getItem('token');
     const data = new FormData();
     data.append('title', formData.title);
     data.append('subject', formData.subject);
@@ -93,18 +84,15 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
       data.append('linkedRequest', linkedRequest._id);
     }
 
-
     setUploading(true);
     setUploadProgress(0);
     setShowProgressModal(true);
     setUploadStatus('uploading');
     setMessage('');
 
-
     try {
-      const response = await axios.post(`${API_URL}/api/materials/upload`, data, {
+      const response = await axiosInstance.post('/api/materials/upload', data, {
         headers: { 
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: (progressEvent) => {
@@ -132,7 +120,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
     }
   };
 
-
   const closeModal = () => {
     if (!uploading) {
       setShowProgressModal(false);
@@ -142,14 +129,12 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
     }
   };
 
-
   return (
     <>
       <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg p-6 border border-indigo-200 dark:border-gray-600 transition-all duration-300">
         <h2 className="text-2xl font-bold mb-4 text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
           Upload Material 📤
         </h2>
-
 
         {linkedRequest && (
           <div className="mb-4 p-4 bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600 rounded-lg">
@@ -166,7 +151,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
           </div>
         )}
 
-
         {isAdmin && (
           <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/30 border-2 border-green-400 dark:border-green-600 rounded-lg">
             <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
@@ -175,7 +159,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             </p>
           </div>
         )}
-
 
         {message && (
           <div className={`mb-4 px-4 py-3 rounded-lg ${
@@ -186,7 +169,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             {message}
           </div>
         )}
-
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -204,7 +186,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📝 Required - Give your material a clear title</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Subject <span className="text-red-500">*</span>
@@ -219,7 +200,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📚 Required - Specify the subject area</p>
           </div>
-
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
@@ -238,7 +218,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📅 Required - Select regulation year</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Description <span className="text-gray-400 text-xs">(Optional)</span>
@@ -252,7 +231,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">💬 Optional - Add details about the content</p>
           </div>
-
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
@@ -301,7 +279,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📍 Required - Select where this material came from</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Material Type
@@ -320,7 +297,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📄 Optional - Type of material</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Material File <span className="text-red-500">*</span>
@@ -337,14 +313,12 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📄 Required - PDF, PNG, JPG, JPEG, PPT, or PPTX (Max 50MB)</p>
           </div>
 
-
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3">
             <p className="text-sm text-yellow-800 dark:text-yellow-300 flex items-center gap-2">
               <span className="text-lg">⚠️</span>
               <span>Fields marked with <span className="text-red-500 font-bold">*</span> are required</span>
             </p>
           </div>
-
 
           <button
             type="submit"
@@ -355,7 +329,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
           </button>
         </form>
       </div>
-
 
       {showProgressModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -381,7 +354,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
                   </p>
                 </>
               )}
-
 
               {uploadStatus === 'success' && uploadedMaterial && (
                 <>
@@ -414,7 +386,6 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
                 </>
               )}
 
-
               {uploadStatus === 'error' && (
                 <>
                   <div className="text-6xl mb-4">❌</div>
@@ -435,6 +406,5 @@ const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
     </>
   );
 };
-
 
 export default UploadForm;

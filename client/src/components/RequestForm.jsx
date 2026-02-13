@@ -1,8 +1,6 @@
 import { useState, useContext } from 'react';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
-
 
 const RequestForm = ({ onRequestSuccess }) => {
   const { user } = useContext(AuthContext);
@@ -16,23 +14,16 @@ const RequestForm = ({ onRequestSuccess }) => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [message, setMessage] = useState('');
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setSubmitting(true);
 
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(`${API_URL}/api/requests`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      await axiosInstance.post('/api/requests', formData);
 
       setShowSuccessDialog(true);
       setFormData({ subject: '', description: '', materialType: 'other', regulationYear: '' });
-
 
       setTimeout(() => {
         window.location.reload();
@@ -43,7 +34,6 @@ const RequestForm = ({ onRequestSuccess }) => {
     }
   };
 
-
   return (
     <>
       <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg p-6 border border-orange-200 dark:border-gray-600 transition-all duration-300">
@@ -51,13 +41,11 @@ const RequestForm = ({ onRequestSuccess }) => {
           Request Material ✋
         </h2>
 
-
         {message && (
           <div className="mb-4 px-4 py-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-400 dark:border-red-500">
             {message}
           </div>
         )}
-
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -75,7 +63,6 @@ const RequestForm = ({ onRequestSuccess }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📚 Required - What subject do you need?</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Regulation Year <span className="text-red-500">*</span>
@@ -92,7 +79,6 @@ const RequestForm = ({ onRequestSuccess }) => {
             </select>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📅 Required - Which regulation year?</p>
           </div>
-
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
@@ -112,7 +98,6 @@ const RequestForm = ({ onRequestSuccess }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📄 Optional - Type of material needed</p>
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Description <span className="text-gray-400 text-xs">(Optional)</span>
@@ -127,14 +112,12 @@ const RequestForm = ({ onRequestSuccess }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">💬 Optional - Add more details about what you need</p>
           </div>
 
-
           <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-3">
             <p className="text-sm text-blue-800 dark:text-blue-300 flex items-center gap-2">
               <span className="text-lg">💡</span>
               <span>Your request will be visible to all members who can fulfill it!</span>
             </p>
           </div>
-
 
           <button
             type="submit"
@@ -145,7 +128,6 @@ const RequestForm = ({ onRequestSuccess }) => {
           </button>
         </form>
       </div>
-
 
       {showSuccessDialog && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -168,6 +150,5 @@ const RequestForm = ({ onRequestSuccess }) => {
     </>
   );
 };
-
 
 export default RequestForm;

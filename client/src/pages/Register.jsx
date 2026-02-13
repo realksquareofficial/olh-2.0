@@ -1,9 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
-
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -14,20 +12,17 @@ const Register = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
-
 
     if (password !== confirmPassword) {
       setError('Passwords do not match!');
       return;
     }
 
-
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/register`, { username, email, password });
+      const { data } = await axiosInstance.post('/api/auth/register', { username, email, password });
       localStorage.setItem('token', data.token);
       login(data.user);
       window.location.href = '/';
@@ -35,7 +30,6 @@ const Register = () => {
       setError(error.response?.data?.message || 'Registration failed');
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 p-4">
@@ -45,13 +39,11 @@ const Register = () => {
           <p className="text-gray-600 dark:text-gray-400">Create your account to get started</p>
         </div>
 
-
         {error && (
           <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
             {error}
           </div>
         )}
-
 
         <form onSubmit={handleRegister} className="space-y-6">
           <div>
@@ -68,7 +60,6 @@ const Register = () => {
             />
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Email
@@ -82,7 +73,6 @@ const Register = () => {
               placeholder="your.email@example.com"
             />
           </div>
-
 
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
@@ -98,7 +88,6 @@ const Register = () => {
             />
           </div>
 
-
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Confirm Password
@@ -113,7 +102,6 @@ const Register = () => {
             />
           </div>
 
-
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
@@ -121,7 +109,6 @@ const Register = () => {
             🚀 Create Account
           </button>
         </form>
-
 
         <div className="mt-6 text-center">
           <p className="text-gray-600 dark:text-gray-400">
@@ -138,6 +125,5 @@ const Register = () => {
     </div>
   );
 };
-
 
 export default Register;

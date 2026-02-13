@@ -1,10 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
 import MaterialCard from '../components/MaterialCard';
-
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -15,7 +13,6 @@ const Profile = () => {
   const [stats, setStats] = useState({ uploadedCount: 0, favoritesCount: 0 });
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -24,28 +21,16 @@ const Profile = () => {
     fetchProfile();
   }, [user, navigate]);
 
-
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
-      const profileRes = await axios.get(`${API_URL}/api/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-       });
+      const profileRes = await axiosInstance.get('/api/users/profile');
       setStats(profileRes.data.stats);
 
-
-      const uploadedRes = await axios.get(`${API_URL}/api/users/my-materials`, {
-        headers: { Authorization: `Bearer ${token}` }
-       });
+      const uploadedRes = await axiosInstance.get('/api/users/my-materials');
       setUploadedMaterials(uploadedRes.data);
 
-
-      const favoritesRes = await axios.get(`${API_URL}/api/materials/favorites/my`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const favoritesRes = await axiosInstance.get('/api/materials/favorites/my');
       setFavoriteMaterials(favoritesRes.data);
-
 
       setLoading(false);
     } catch (err) {
@@ -54,13 +39,11 @@ const Profile = () => {
     }
   };
 
-
   const getRoleBadge = () => {
     if (user?.role === 'master') return { icon: '👑', text: 'Master', color: 'from-yellow-400 to-orange-500' };
     if (user?.role === 'admin') return { icon: '⚡', text: 'Admin', color: 'from-purple-400 to-indigo-500' };
     return { icon: '👤', text: 'User', color: 'from-blue-400 to-indigo-500' };
   };
-
 
   if (loading) {
     return (
@@ -70,9 +53,7 @@ const Profile = () => {
     );
   }
 
-
   const roleBadge = getRoleBadge();
-
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -100,7 +81,6 @@ const Profile = () => {
               </div>
             </div>
 
-
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4 text-center border border-indigo-200 dark:border-indigo-700">
                 <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{stats.uploadedCount}</div>
@@ -121,7 +101,6 @@ const Profile = () => {
             </div>
           </div>
         </div>
-
 
         <div className="mb-6">
           <div className="grid grid-cols-2 gap-3 md:flex md:gap-0 md:border-b md:border-gray-300 md:dark:border-gray-700">
@@ -153,7 +132,6 @@ const Profile = () => {
           </div>
         </div>
 
-
         {activeTab === 'uploaded' && (
           <div>
             {uploadedMaterials.length === 0 ? (
@@ -177,7 +155,6 @@ const Profile = () => {
             )}
           </div>
         )}
-
 
         {activeTab === 'favorites' && (
           <div>
@@ -206,6 +183,5 @@ const Profile = () => {
     </div>
   );
 };
-
 
 export default Profile;

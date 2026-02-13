@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
-import API_URL from '../config/api';
-
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -15,19 +13,14 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     fetchStats();
     fetchUsers();
   }, []);
 
-
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/admin/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/api/admin/stats');
       setStats(res.data);
       setLoading(false);
     } catch (err) {
@@ -36,42 +29,32 @@ const AdminDashboard = () => {
     }
   };
 
-
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/users/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/api/users/all');
       setUsers(res.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-
   const handleReject = async (materialId) => {
-  const reason = prompt('Enter rejection reason (optional):');
-  try {
-    const token = localStorage.getItem('token');
-    await axios.patch(
-      `${API_URL}/api/materials/${materialId}/reject`,
-      { reason },
-      { headers: { Authorization: `Bearer ${token}` } }
+    const reason = prompt('Enter rejection reason (optional):');
+    try {
+      await axiosInstance.patch(
+        `/api/materials/${materialId}/reject`,
+        { reason }
       );
-       fetchPendingMaterials();
-    }  catch (error) {
-       console.error(error);
+      fetchPendingMaterials();
+    } catch (error) {
+      console.error(error);
     }
   };
 
-
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/api/users/${userId}/role`, 
-        { role: newRole },
-        { headers: { Authorization: `Bearer ${token}` }}
+      await axiosInstance.patch(`/api/users/${userId}/role`, 
+        { role: newRole }
       );
       alert('Role updated! ✅');
       fetchUsers();
@@ -81,16 +64,11 @@ const AdminDashboard = () => {
     }
   };
 
-
   const handleDeleteUser = async (userId) => {
     if (!window.confirm('Delete this user permanently?')) return;
 
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/api/users/${userId}`);
       alert('User deleted! ✅');
       fetchUsers();
     } catch (err) {
@@ -99,16 +77,13 @@ const AdminDashboard = () => {
     }
   };
 
-
   if (loading) {
     return <div className="text-center text-2xl mt-20">Loading...</div>;
   }
 
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-8 text-indigo-600 dark:text-indigo-400">⚙️ Admin Dashboard</h1>
-
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
@@ -117,13 +92,11 @@ const AdminDashboard = () => {
           <div className="text-blue-100">Total Users</div>
         </div>
 
-
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
           <div className="text-3xl mb-2">📚</div>
           <div className="text-4xl font-bold">{stats.totalMaterials}</div>
           <div className="text-green-100">Total Materials</div>
         </div>
-
 
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white p-6 rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate('/')}>
           <div className="text-3xl mb-2">⏳</div>
@@ -131,14 +104,12 @@ const AdminDashboard = () => {
           <div className="text-yellow-100">Pending Approvals</div>
         </div>
 
-
         <div className="bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate('/')}>
           <div className="text-3xl mb-2">🚩</div>
           <div className="text-4xl font-bold">{stats.reportedMaterials}</div>
           <div className="text-red-100">Reported Materials</div>
         </div>
       </div>
-
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">👥 User Management</h2>
@@ -190,6 +161,5 @@ const AdminDashboard = () => {
     </div>
   );
 };
-
 
 export default AdminDashboard;

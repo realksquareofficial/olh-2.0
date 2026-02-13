@@ -1,24 +1,17 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_URL from '../config/api';
-
+import axiosInstance from '../utils/axios';
 
 const Reports = () => {
   const [reportedMaterials, setReportedMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     fetchReports();
   }, []);
 
-
   const fetchReports = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_URL}/api/materials/reports/all`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get('/api/materials/reports/all');
       setReportedMaterials(res.data);
       setLoading(false);
     } catch (err) {
@@ -27,18 +20,13 @@ const Reports = () => {
     }
   };
 
-
   const handleDelete = async (materialId) => {
     if (!window.confirm('⚠️ DELETE this material permanently?')) {
       return;
     }
 
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/api/materials/${materialId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/api/materials/${materialId}`);
       alert('Deleted! ✅');
       fetchReports();
     } catch (err) {
@@ -47,18 +35,13 @@ const Reports = () => {
     }
   };
 
-
   const handleIgnore = async (materialId) => {
     if (!window.confirm('Clear all reports?')) {
       return;
     }
 
-
     try {
-      const token = localStorage.getItem('token');
-      await axios.patch(`${API_URL}/api/materials/${materialId}/ignore-reports`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.patch(`/api/materials/${materialId}/ignore-reports`, {});
       alert('Reports cleared! ✅');
       fetchReports();
     } catch (err) {
@@ -67,21 +50,17 @@ const Reports = () => {
     }
   };
 
-
   if (loading) {
     return <div className="text-center text-2xl mt-20">Loading...</div>;
   }
-
 
   if (reportedMaterials.length === 0) {
     return <div className="text-center text-2xl mt-20">No reports! 🎉</div>;
   }
 
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-4xl font-bold text-red-500 mb-8">🚩 Reported Materials ({reportedMaterials.length})</h1>
-
 
       <div className="space-y-6">
         {reportedMaterials.map((material) => (
@@ -105,7 +84,6 @@ const Reports = () => {
               </div>
             </div>
 
-
             {/* REPORTS LIST */}
             <div className="mb-6">
               <h3 className="text-2xl font-bold text-red-600 mb-4">📋 Reports ({material.reports.length})</h3>
@@ -126,7 +104,6 @@ const Reports = () => {
               </div>
             </div>
 
-
             {/* ACTION BUTTONS - RIGHT HERE! */}
             <div className="flex gap-4 mt-8">
               <button
@@ -143,13 +120,11 @@ const Reports = () => {
               </button>
             </div>
 
-
           </div>
         ))}
       </div>
     </div>
   );
 };
-
 
 export default Reports;

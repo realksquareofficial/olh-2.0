@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_URL from './config/api';
+import axiosInstance from './utils/axios';
 import Navbar from './components/Navbar';
 import LoadingScreen from './components/LoadingScreen';
 import AdminDashboard from './pages/AdminDashboard';
@@ -10,20 +9,16 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 
-
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const loadApp = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const res = await axios.get(`${API_URL}/api/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await axiosInstance.get('/api/auth/me');
           setUser(res.data);
         } catch (err) {
           console.error(err);
@@ -37,15 +32,12 @@ function App() {
       }, 1500);
     };
 
-
     loadApp();
   }, []);
-
 
   if (loading) {
     return <LoadingScreen />;
   }
-
 
   return (
     <Router>
@@ -62,6 +54,5 @@ function App() {
     </Router>
   );
 }
-
 
 export default App;

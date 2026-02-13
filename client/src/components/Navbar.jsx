@@ -1,9 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import API_URL from '../config/api';
+import axiosInstance from '../utils/axios';
 import Notifications from '../components/Notifications';
-
 
 const Navbar = ({ user, setUser }) => {
   const [theme, setTheme] = useState('light');
@@ -12,13 +10,11 @@ const Navbar = ({ user, setUser }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     applyTheme(savedTheme);
   }, []);
-
 
   const applyTheme = (newTheme) => {
     document.documentElement.classList.remove('dark', 'olh-theme');
@@ -29,7 +25,6 @@ const Navbar = ({ user, setUser }) => {
     }
   };
 
-
   const cycleTheme = () => {
     const themes = ['light', 'dark', 'olh'];
     const currentIndex = themes.indexOf(theme);
@@ -39,13 +34,11 @@ const Navbar = ({ user, setUser }) => {
     applyTheme(nextTheme);
   };
 
-
   const getThemeIcon = () => {
     if (theme === 'light') return '☀️';
     if (theme === 'dark') return '🌙';
     return '#';
   };
-
 
   const getThemeLabel = () => {
     if (theme === 'light') return 'Light';
@@ -53,27 +46,21 @@ const Navbar = ({ user, setUser }) => {
     return 'OLH 2.0';
   };
 
-
   useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, [user]);
 
-
   const fetchUnreadCount = async () => {
     if (!user) return;
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.get(`${API_URL}/api/notifications/unread-count`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data } = await axiosInstance.get('/api/notifications/unread-count');
       setUnreadCount(data.count);
     } catch (error) {
       console.error(error);
     }
   };
-
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -81,9 +68,7 @@ const Navbar = ({ user, setUser }) => {
     window.location.href = '/';
   };
 
-
   const closeMenu = () => setMenuOpen(false);
-
 
   return (
     <>
@@ -93,7 +78,6 @@ const Navbar = ({ user, setUser }) => {
             <Link to="/" className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 olh-theme:text-olh-light hover:scale-105 transition-transform" onClick={closeMenu}>
               OLH 2.0
             </Link>
-
 
             <div className="flex items-center gap-2">
               {/* Mobile Upload & Request Buttons - Icon only, next to hamburger */}
@@ -116,7 +100,6 @@ const Navbar = ({ user, setUser }) => {
                 </div>
               )}
 
-
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="md:hidden p-2 rounded-lg bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-700 dark:text-gray-300 olh-theme:text-olh-text hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors text-xl"
@@ -125,12 +108,10 @@ const Navbar = ({ user, setUser }) => {
               </button>
             </div>
 
-
             <div className="hidden md:flex items-center gap-4">
               <Link to="/" className="px-4 py-2 bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-800 dark:text-gray-200 olh-theme:text-olh-text rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors font-semibold">
                 🏠 Home
               </Link>
-
 
               {user && (
                 <button
@@ -147,7 +128,6 @@ const Navbar = ({ user, setUser }) => {
                 </button>
               )}
 
-
               <button
                 onClick={cycleTheme}
                 className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-800 dark:text-gray-200 olh-theme:text-olh-text hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors font-semibold flex items-center gap-2"
@@ -157,13 +137,11 @@ const Navbar = ({ user, setUser }) => {
                 <span className="text-sm hidden lg:inline">{getThemeLabel()}</span>
               </button>
 
-
               {user && ['admin', 'master'].includes(user.role) && (
                 <Link to="/admin" className="px-4 py-2 bg-indigo-200 dark:bg-indigo-800 olh-theme:bg-olh-primary text-indigo-800 dark:text-indigo-200 olh-theme:text-white rounded-lg hover:bg-indigo-300 dark:hover:bg-indigo-700 olh-theme:hover:bg-olh-dark transition-colors font-semibold">
                   ⚙️ Admin
                 </Link>
               )}
-
 
               {user ? (
                 <>
@@ -192,7 +170,6 @@ const Navbar = ({ user, setUser }) => {
         </div>
       </nav>
 
-
       {menuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={closeMenu}></div>
@@ -203,7 +180,6 @@ const Navbar = ({ user, setUser }) => {
                 ✖️
               </button>
             </div>
-
 
             {user ? (
               <>
@@ -220,12 +196,10 @@ const Navbar = ({ user, setUser }) => {
                   )}
                 </div>
 
-
                 <div className="flex-1 flex flex-col gap-2 p-4">
                   <Link to="/" onClick={closeMenu} className="w-full px-4 py-4 bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-800 dark:text-gray-200 olh-theme:text-olh-text rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors font-semibold text-left flex items-center gap-3">
                     <span className="text-xl">🏠</span> Home
                   </Link>
-
 
                   <button
                     onClick={() => {
@@ -242,11 +216,9 @@ const Navbar = ({ user, setUser }) => {
                     )}
                   </button>
 
-
                   <Link to="/profile" onClick={closeMenu} className="w-full px-4 py-4 bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-800 dark:text-gray-200 olh-theme:text-olh-text rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors font-semibold text-left flex items-center gap-3">
                     <span className="text-xl">👤</span> My Profile
                   </Link>
-
 
                   <button
                     onClick={cycleTheme}
@@ -255,14 +227,12 @@ const Navbar = ({ user, setUser }) => {
                     <span className="text-xl">{getThemeIcon()}</span> {getThemeLabel()} Theme
                   </button>
 
-
                   {user && ['admin', 'master'].includes(user.role) && (
                     <Link to="/admin" onClick={closeMenu} className="w-full px-4 py-4 bg-indigo-200 dark:bg-indigo-800 olh-theme:bg-olh-primary text-indigo-800 dark:text-indigo-200 olh-theme:text-white rounded-lg hover:bg-indigo-300 dark:hover:bg-indigo-700 olh-theme:hover:bg-olh-dark transition-colors font-semibold text-left flex items-center gap-3">
                       <span className="text-xl">⚙️</span> Admin Dashboard
                     </Link>
                   )}
                 </div>
-
 
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700 olh-theme:border-olh-card">
                   <button
@@ -282,7 +252,6 @@ const Navbar = ({ user, setUser }) => {
                   Register
                 </Link>
 
-
                 <button
                   onClick={cycleTheme}
                   className="w-full px-4 py-4 bg-gray-200 dark:bg-gray-700 olh-theme:bg-olh-card text-gray-800 dark:text-gray-200 olh-theme:text-olh-text rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 olh-theme:hover:bg-olh-primary transition-colors font-semibold text-center flex items-center justify-center gap-3"
@@ -295,7 +264,6 @@ const Navbar = ({ user, setUser }) => {
         </div>
       )}
 
-
       <Notifications 
         show={showNotifications} 
         onClose={() => {
@@ -306,6 +274,5 @@ const Navbar = ({ user, setUser }) => {
     </>
   );
 };
-
 
 export default Navbar;
