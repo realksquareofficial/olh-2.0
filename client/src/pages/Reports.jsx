@@ -9,6 +9,8 @@ const Reports = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showIgnoreDialog, setShowIgnoreDialog] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successText, setSuccessText] = useState('');
 
   useEffect(() => {
     fetchReports();
@@ -37,10 +39,18 @@ const Reports = () => {
       await axiosInstance.delete(`/api/materials/${selectedMaterial._id}`);
       setShowDeleteDialog(false);
       setSelectedMaterial(null);
+      
+      // Show success message
+      setSuccessText('Material deleted successfully! ✅');
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+      
       fetchReports();
     } catch (err) {
       console.error(err);
-      alert('Failed to delete material!');
+      setSuccessText('Failed to delete material! ❌');
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
     }
   };
 
@@ -56,10 +66,18 @@ const Reports = () => {
       await axiosInstance.patch(`/api/materials/${selectedMaterial._id}/ignore-reports`, {});
       setShowIgnoreDialog(false);
       setSelectedMaterial(null);
+      
+      // Show success message
+      setSuccessText('Reports cleared successfully! ✅');
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+      
       fetchReports();
     } catch (err) {
       console.error(err);
-      alert('Failed to ignore reports!');
+      setSuccessText('Failed to clear reports! ❌');
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
     }
   };
 
@@ -138,6 +156,19 @@ const Reports = () => {
           ))}
         </div>
       </div>
+
+      {/* SUCCESS/ERROR MESSAGE TOAST */}
+      {showSuccessMessage && (
+        <div className="fixed top-24 right-8 z-50 animate-fade-in">
+          <div className={`${
+            successText.includes('✅') 
+              ? 'bg-green-500' 
+              : 'bg-red-500'
+          } text-white px-6 py-4 rounded-xl shadow-2xl font-bold text-lg`}>
+            {successText}
+          </div>
+        </div>
+      )}
 
       {/* DELETE CONFIRMATION DIALOG */}
       {showDeleteDialog && selectedMaterial && (
