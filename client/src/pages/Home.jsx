@@ -8,6 +8,7 @@ import SearchBar from '../components/SearchBar';
 import RequestForm from '../components/RequestForm';
 import RequestCard from '../components/RequestCard';
 import Reports from './Reports';
+import API_URL from '../config/api';
 
 const Home = () => {
   const { user } = useContext(AuthContext);
@@ -63,7 +64,7 @@ const Home = () => {
 
   const fetchMaterials = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/materials');
+      const res = await axios.get(`${API_URL}/api/materials`);
       setMaterials(res.data);
       setFilteredMaterials(res.data);
     } catch (err) {
@@ -73,7 +74,7 @@ const Home = () => {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/requests');
+      const res = await axios.get(`${API_URL}/api/requests`);
       setRequests(res.data);
     } catch (err) {
       console.error(err);
@@ -83,7 +84,7 @@ const Home = () => {
   const fetchPendingMaterials = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/materials/pending/all', {
+      const res = await axios.get(`${API_URL}/api/materials/pending/all`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPendingMaterials(res.data);
