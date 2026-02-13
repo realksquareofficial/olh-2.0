@@ -7,6 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const Register = () => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,7 +27,7 @@ const Register = () => {
 
 
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/register`, { username, password });
+      const { data } = await axios.post(`${API_URL}/api/auth/register`, { username, email, password });
       localStorage.setItem('token', data.token);
       login(data.user);
       window.location.href = '/';
@@ -64,6 +65,21 @@ const Register = () => {
               required
               className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
               placeholder="Choose a username"
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="your.email@example.com"
             />
           </div>
 
