@@ -1,7 +1,6 @@
 const CACHE_NAME = 'olh-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/logo.png',
   '/icons/192.png',
@@ -19,15 +18,24 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  if (event.request.method !== 'GET' || url.pathname.includes('/api/')) {
+    return;
+  }
+  
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
 
