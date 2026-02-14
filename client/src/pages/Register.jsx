@@ -9,68 +9,12 @@ const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
 const [confirmPassword, setConfirmPassword] = useState('');
 const [error, setError] = useState('');
-const [passwordStrength, setPasswordStrength] = useState('');
-const [passwordErrors, setPasswordErrors] = useState([]);
 const { login } = useContext(AuthContext);
 const navigate = useNavigate();
-
-const validatePassword = (pwd) => {
-const errors = [];
-const commonPatterns = ['12345', '123456', '1234567', '12345678', 'abcdef', 'qwerty', 'password', '00000', '11111'];
-
-if (pwd.length < 8) {
-errors.push('At least 8 characters required');
-}
-if (!/[a-zA-Z]/.test(pwd)) {
-errors.push('Must contain at least one letter');
-}
-if (!/[0-9]/.test(pwd)) {
-errors.push('Must contain at least one number');
-}
-
-const lowerPwd = pwd.toLowerCase();
-if (commonPatterns.some(pattern => lowerPwd.includes(pattern))) {
-errors.push('Avoid common patterns like 12345 or qwerty');
-}
-
-if (/^[a-zA-Z]+$/.test(pwd) || /^[0-9]+$/.test(pwd)) {
-errors.push('Mix letters and numbers together');
-}
-
-setPasswordErrors(errors);
-
-if (errors.length === 0 && pwd.length >= 12) {
-setPasswordStrength('Strong');
-} else if (errors.length === 0) {
-setPasswordStrength('Good');
-} else if (pwd.length >= 6 && errors.length <= 2) {
-setPasswordStrength('Weak');
-} else {
-setPasswordStrength('');
-}
-
-return errors.length === 0;
-};
-
-const handlePasswordChange = (e) => {
-const pwd = e.target.value;
-setPassword(pwd);
-if (pwd) {
-validatePassword(pwd);
-} else {
-setPasswordErrors([]);
-setPasswordStrength('');
-}
-};
 
 const handleRegister = async (e) => {
 e.preventDefault();
 setError('');
-
-if (!validatePassword(password)) {
-setError('Please fix the password issues below');
-return;
-}
 
 if (password !== confirmPassword) {
 setError('Passwords do not match!');
@@ -137,35 +81,11 @@ Password
 <input
 type="password"
 value={password}
-onChange={handlePasswordChange}
+onChange={(e) => setPassword(e.target.value)}
 required
 className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white"
-placeholder="Create a strong password"
+placeholder="Create a password"
 />
-
-{passwordStrength && (
-<div className="mt-2 flex items-center gap-2">
-<span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Strength:</span>
-<span className={`text-sm font-bold ${
-passwordStrength === 'Strong' ? 'text-green-600 dark:text-green-400' :
-passwordStrength === 'Good' ? 'text-blue-600 dark:text-blue-400' :
-'text-orange-600 dark:text-orange-400'
-}`}>
-{passwordStrength === 'Strong' ? '💪 Strong' : passwordStrength === 'Good' ? '✅ Good' : '⚠️ Weak'}
-</span>
-</div>
-)}
-
-{passwordErrors.length > 0 && (
-<ul className="mt-2 space-y-1">
-{passwordErrors.map((err, idx) => (
-<li key={idx} className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-<span>❌</span>
-<span>{err}</span>
-</li>
-))}
-</ul>
-)}
 </div>
 
 <div>
