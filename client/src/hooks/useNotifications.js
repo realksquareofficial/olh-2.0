@@ -5,6 +5,7 @@ const useNotifications = (user) => {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const [permission, setPermission] = useState('default');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -16,9 +17,13 @@ const useNotifications = (user) => {
 
   const urlBase64ToUint8Array = (base64String) => {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
+
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
@@ -31,8 +36,11 @@ const useNotifications = (user) => {
       const sub = await registration.pushManager.getSubscription();
       if (sub) {
         setSubscription(sub);
-        // Ensure backend has it too!
-        await axiosInstance.post('/api/push/subscribe', { subscription: sub });
+        try {
+           await axiosInstance.post('/api/push/subscribe', { subscription: sub });
+        } catch (e) {
+           console.warn('Sync sub failed:', e);
+        }
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -40,60 +48,77 @@ const useNotifications = (user) => {
   };
 
   const subscribe = async () => {
+    setLoading(true);
     try {
-      console.log('Requesting permission...');
       const perm = await Notification.requestPermission();
       setPermission(perm);
 
       if (perm !== 'granted') {
         alert('Permission denied! Please enable notifications in browser settings.');
+        setLoading(false);
         return false;
       }
 
-      console.log('Permission granted! Registering SW...');
       const registration = await navigator.serviceWorker.ready;
-      
-      console.log('Fetching VAPID key...');
+
       const { data } = await axiosInstance.get('/api/push/vapid-public-key');
-      console.log('VAPID Key received:', data.publicKey);
-      
-      console.log('Subscribing to PushManager...');
+      if (!data.publicKey) throw new Error('No public key returned from server');
+
+      const convertedVapidKey = urlBase64ToUint8Array(data.publicKey);
+
+      console.log('Subscribing with key:', data.publicKey);
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(data.publicKey)
+        applicationServerKey: convertedVapidKey
       });
-      console.log('PushManager subscription successful:', sub);
 
-      console.log('Sending subscription to backend...');
       await axiosInstance.post('/api/push/subscribe', { subscription: sub });
-      console.log('Backend saved subscription!');
-
+      
       setSubscription(sub);
+      alert('Notifications Enabled! 🎉');
+      setLoading(false);
       return true;
+
     } catch (error) {
       console.error('Subscription error details:', error);
-      alert(`Subscription failed: ${error.message || 'Unknown error'}`);
+      
+      let msg = error.message;
+      if (error.name === 'NotAllowedError') msg = 'Permission denied by browser.';
+      if (error.name === 'InvalidStateError') msg = 'Service Worker not ready.';
+      if (error.name === 'AbortError') msg = 'Subscription aborted.';
+      
+      alert(`Subscription failed: ${msg}`);
+      setLoading(false);
       return false;
     }
   };
 
   const unsubscribe = async () => {
+    setLoading(true);
     try {
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.getSubscription();
       if (sub) {
         await sub.unsubscribe();
       }
-      await axiosInstance.delete('/api/push/unsubscribe');
+      
+      try {
+        await axiosInstance.delete('/api/push/unsubscribe');
+      } catch (e) {
+        console.warn('Backend unsubscribe failed:', e);
+      }
+
       setSubscription(null);
+      setLoading(false);
       return true;
     } catch (error) {
       console.error('Unsubscribe error:', error);
+      setLoading(false);
       return false;
     }
   };
 
-  return { isSupported, permission, subscription, subscribe, unsubscribe };
+  return { isSupported, permission, subscription, subscribe, unsubscribe, loading };
 };
 
 export default useNotifications;
