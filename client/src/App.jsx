@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import axiosInstance from './utils/axios';
 import Navbar from './components/Navbar';
 import LoadingScreen from './components/LoadingScreen';
+import OfflineAlert from './components/OfflineAlert';
 import AdminDashboard from './pages/AdminDashboard';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -41,6 +42,7 @@ function App() {
 
   return (
     <Router>
+      <OfflineAlert />
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 olh-theme:bg-olh-bg transition-colors duration-300">
         <Navbar user={user} setUser={setUser} />
         <Routes>
