@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axios';
 
+// HARDCODED KEY - NO API FETCH NEEDED
+const VAPID_PUBLIC_KEY = 'BCaP_jbLEKdYeguVovazg7pM-mkRU8wulDBEtHWmxxs-zpsRT3bW7HFN4YvhZM_x6juIsWjMVIUyZLgwdxxOx0Q';
+
 const useNotifications = (user) => {
   const [isSupported, setIsSupported] = useState(false);
   const [subscription, setSubscription] = useState(null);
@@ -36,11 +39,6 @@ const useNotifications = (user) => {
       const sub = await registration.pushManager.getSubscription();
       if (sub) {
         setSubscription(sub);
-        try {
-           await axiosInstance.post('/api/push/subscribe', { subscription: sub });
-        } catch (e) {
-           console.warn('Sync sub failed:', e);
-        }
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -60,18 +58,16 @@ const useNotifications = (user) => {
       }
 
       const registration = await navigator.serviceWorker.ready;
+      const convertedVapidKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
-      const { data } = await axiosInstance.get('/api/push/vapid-public-key');
-      if (!data.publicKey) throw new Error('No public key returned from server');
-
-      const convertedVapidKey = urlBase64ToUint8Array(data.publicKey);
-
-      console.log('Subscribing with key:', data.publicKey);
+      console.log('Subscribing with key:', VAPID_PUBLIC_KEY);
+      
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey
       });
 
+      console.log('Sending subscription to backend...');
       await axiosInstance.post('/api/push/subscribe', { subscription: sub });
       
       setSubscription(sub);
@@ -81,13 +77,7 @@ const useNotifications = (user) => {
 
     } catch (error) {
       console.error('Subscription error details:', error);
-      
-      let msg = error.message;
-      if (error.name === 'NotAllowedError') msg = 'Permission denied by browser.';
-      if (error.name === 'InvalidStateError') msg = 'Service Worker not ready.';
-      if (error.name === 'AbortError') msg = 'Subscription aborted.';
-      
-      alert(`Subscription failed: ${msg}`);
+      alert(`Subscription failed: ${error.message}`);
       setLoading(false);
       return false;
     }
