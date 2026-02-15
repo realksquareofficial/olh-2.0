@@ -43,6 +43,14 @@ exports.getUserMaterials = async (req, res) => {
 
     const materials = await Material.find({ uploadedBy: decoded.id })
       .populate('uploadedBy', 'username email role')
+      .populate({
+        path: 'linkedRequest',
+        select: 'subject description requestedBy',
+        populate: {
+          path: 'requestedBy',
+          select: 'username'
+        }
+      })
       .sort({ createdAt: -1 });
 
     res.json(materials);
