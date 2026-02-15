@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axios';
 
-// HARDCODED KEY - NO API FETCH NEEDED
-const VAPID_PUBLIC_KEY = 'BCaP_jbLEKdYeguVovazg7pM-mkRU8wulDBEtHWmxxs-zpsRT3bW7HFN4YvhZM_x6juIsWjMVIUyZLgwdxxOx0Q';
+const VAPID_PUBLIC_KEY = 'BKlyM09d_3m2sg0sPIiwcy43lzChI-xkvNfpUjo-ZnYqClT8k4PYF5NVo7s1VvZcQq0rA0GnNsIvPmv40yp9eXg';
 
 const useNotifications = (user) => {
   const [isSupported, setIsSupported] = useState(false);
