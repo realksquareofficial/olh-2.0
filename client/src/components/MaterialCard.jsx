@@ -194,8 +194,8 @@ Linked to Request
 </div>
 )}
 
-<h3 className="text-xl font-bold mb-2 dark:text-white olh-theme:text-gray-900 pr-24">{material.title}</h3>
-<p className="text-gray-600 dark:text-gray-300 olh-theme:text-gray-700 mb-2 font-semibold">{material.subject}</p>
+<h3 className="text-xl font-bold mb-2 dark:text-white olh-theme:text-gray-900 pr-24">{material.subject}</h3>
+<h4 className="text-gray-600 dark:text-gray-300 olh-theme:text-gray-700 mb-2 font-semibold">{material.title}</h4>
 <p className="text-gray-500 dark:text-gray-400 olh-theme:text-gray-600 text-sm mb-3">{material.description}</p>
 
 <div className="flex gap-2 mb-3 flex-wrap">
