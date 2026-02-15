@@ -3,6 +3,14 @@ const router = express.Router();
 const PushSubscription = require('../models/PushSubscription');
 const { protect } = require('../middleware/auth');
 
+const webpush = require('web-push');
+
+router.get('/generate-keys', (req, res) => {
+  const vapidKeys = webpush.generateVAPIDKeys();
+  res.json(vapidKeys);
+});
+
+
 router.post('/subscribe', protect, async (req, res) => {
   try {
     const { subscription } = req.body;
