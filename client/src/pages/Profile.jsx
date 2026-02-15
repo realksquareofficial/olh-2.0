@@ -5,7 +5,6 @@ import { AuthContext } from '../context/AuthContext';
 import MaterialCard from '../components/MaterialCard';
 import NotificationSettings from '../components/NotificationSettings';
 
-
 const Profile = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -15,7 +14,6 @@ const Profile = () => {
   const [stats, setStats] = useState({ uploadedCount: 0, favoritesCount: 0 });
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -24,20 +22,16 @@ const Profile = () => {
     fetchProfile();
   }, [user, navigate]);
 
-
   const fetchProfile = async () => {
     try {
       const profileRes = await axiosInstance.get('/api/users/profile');
       setStats(profileRes.data.stats);
 
-
       const uploadedRes = await axiosInstance.get('/api/users/my-materials');
       setUploadedMaterials(uploadedRes.data);
 
-
       const favoritesRes = await axiosInstance.get('/api/materials/favorites/my');
       setFavoriteMaterials(favoritesRes.data);
-
 
       setLoading(false);
     } catch (err) {
@@ -46,13 +40,11 @@ const Profile = () => {
     }
   };
 
-
   const getRoleBadge = () => {
     if (user?.role === 'master') return { icon: '👑', text: 'Master', color: 'from-yellow-400 to-orange-500' };
     if (user?.role === 'admin') return { icon: '⚡', text: 'Admin', color: 'from-purple-400 to-indigo-500' };
     return { icon: '👤', text: 'User', color: 'from-blue-400 to-indigo-500' };
   };
-
 
   if (loading) {
     return (
@@ -62,9 +54,7 @@ const Profile = () => {
     );
   }
 
-
   const roleBadge = getRoleBadge();
-
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -92,7 +82,6 @@ const Profile = () => {
               </div>
             </div>
 
-
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4 text-center border border-indigo-200 dark:border-indigo-700">
                 <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{stats.uploadedCount}</div>
@@ -114,52 +103,47 @@ const Profile = () => {
           </div>
         </div>
 
-
         <div className="mb-6">
           <div className="grid grid-cols-3 gap-2 md:flex md:gap-0 md:border-b md:border-gray-300 md:dark:border-gray-700">
             <button
               onClick={() => setActiveTab('uploaded')}
-              className={`flex items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none ${
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none text-xs md:text-base ${
                 activeTab === 'uploaded'
                   ? 'bg-indigo-500 text-white md:bg-transparent md:border-b-4 md:border-indigo-600 md:text-indigo-600 md:dark:text-indigo-400 shadow-md md:shadow-none'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:bg-transparent md:hover:text-indigo-600 md:dark:hover:text-indigo-400 border border-gray-200 dark:border-gray-700 md:border-0'
               }`}
             >
               <span className="text-xl md:text-base">📤</span>
-              <span className="hidden md:inline">My Uploads</span>
-              <span className="md:hidden">Uploads</span>
-              <span className="text-sm opacity-75">({uploadedMaterials.length})</span>
+              <span>Uploads</span>
+              <span className="text-xs opacity-75">({uploadedMaterials.length})</span>
             </button>
             
             <button
               onClick={() => setActiveTab('favorites')}
-              className={`flex items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none ${
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none text-xs md:text-base ${
                 activeTab === 'favorites'
                   ? 'bg-pink-500 text-white md:bg-transparent md:border-b-4 md:border-pink-600 md:text-pink-600 md:dark:text-pink-400 shadow-md md:shadow-none'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:bg-transparent md:hover:text-pink-600 md:dark:hover:text-pink-400 border border-gray-200 dark:border-gray-700 md:border-0'
               }`}
             >
               <span className="text-xl md:text-base">❤️</span>
-              <span className="hidden md:inline">Favorites</span>
-              <span className="md:hidden">Saved</span>
-              <span className="text-sm opacity-75">({favoriteMaterials.length})</span>
+              <span>Saved</span>
+              <span className="text-xs opacity-75">({favoriteMaterials.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('notifications')}
-              className={`flex items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none ${
+              className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none text-xs md:text-base ${
                 activeTab === 'notifications'
                   ? 'bg-green-500 text-white md:bg-transparent md:border-b-4 md:border-green-600 md:text-green-600 md:dark:text-green-400 shadow-md md:shadow-none'
                   : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:bg-transparent md:hover:text-green-600 md:dark:hover:text-green-400 border border-gray-200 dark:border-gray-700 md:border-0'
               }`}
             >
               <span className="text-xl md:text-base">🔔</span>
-              <span className="hidden md:inline">Notifications</span>
-              <span className="md:hidden">Notifs</span>
+              <span>Notifs</span>
             </button>
           </div>
         </div>
-
 
         {activeTab === 'uploaded' && (
           <div>
@@ -184,7 +168,6 @@ const Profile = () => {
             )}
           </div>
         )}
-
 
         {activeTab === 'favorites' && (
           <div>
@@ -219,6 +202,5 @@ const Profile = () => {
     </div>
   );
 };
-
 
 export default Profile;
