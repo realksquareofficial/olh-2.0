@@ -4,12 +4,18 @@ const OfflineAlert = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const handleStatusChange = () => setIsOnline(navigator.onLine);
-    window.addEventListener('online', handleStatusChange);
-    window.addEventListener('offline', handleStatusChange);
+    const handleOnline = () => {
+      setIsOnline(true);
+      window.location.reload();
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
-      window.removeEventListener('online', handleStatusChange);
-      window.removeEventListener('offline', handleStatusChange);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
@@ -17,12 +23,9 @@ const OfflineAlert = () => {
 
   return (
     <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4">
-      <div className="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-bounce">
+      <div className="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-bounce border border-gray-700">
         <span>📡</span>
-        <div>
-          <p className="font-bold">You are offline</p>
-          <p className="text-xs">Viewing cached version</p>
-        </div>
+        <p className="font-bold text-sm">You're offline, connect to the internet...</p>
       </div>
     </div>
   );

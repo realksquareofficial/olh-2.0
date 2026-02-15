@@ -200,13 +200,13 @@ Linked to Request
 
 <div className="flex gap-2 mb-3 flex-wrap">
 <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 olh-theme:bg-gray-200 rounded text-xs dark:text-white olh-theme:text-gray-700">
-{material.source}
+Source: {material.source}
 </span>
 <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 olh-theme:bg-gray-200 rounded text-xs dark:text-white olh-theme:text-gray-700">
-{material.regulationYear}
+Regulation year: {material.regulationYear}
 </span>
 <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 olh-theme:bg-gray-200 rounded text-xs dark:text-white olh-theme:text-gray-700">
-{material.materialType}
+Material type: {material.materialType}
 </span>
 </div>
 
@@ -225,7 +225,7 @@ target="_blank"
 rel="noopener noreferrer"
 className="text-blue-500 olh-theme:text-olh-primary hover:underline"
 >
-📄 View PDF
+📄 View
 </a>
 <a
 href={`${API_URL}/api/materials/${material._id}/download`}
