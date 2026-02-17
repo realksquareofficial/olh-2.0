@@ -1,5 +1,6 @@
 {
   "name": "OLH 2.0 - Online Learning Hub",
+  "gcm_sender_id": "103953800507",
   "short_name": "OLH 2.0",
   "description": "Share and discover study materials with your college community",
   "start_url": "/",
