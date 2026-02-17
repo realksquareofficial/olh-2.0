@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../utils/axios';
 
-const VAPID_PUBLIC_KEY = 'BKlyM09d_3m2sg0sPIiwcy43lzChI-xkvNfpUjo-ZnYqClT8k4PYF5NVo7s1VvZcQq0rA0GnNsIvPmv40yp9eXg';
+const VAPID_PUBLIC_KEY = 'BDl9zChy6THGHFqD14dKbPSDmHkP-PEsGodFDXDUdu3j-zqFwbqalDNnAkbio3TmOIKN-BE1Sz5MGW6iYLED_DI';
 
 const useNotifications = (user) => {
   const [isSupported, setIsSupported] = useState(false);
