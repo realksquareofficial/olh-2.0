@@ -1,11 +1,11 @@
 const webpush = require('web-push');
 const PushSubscription = require('../models/PushSubscription');
 
-webpush.setVapidDetails(
+/*webpush.setVapidDetails(
   process.env.VAPID_SUBJECT,
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
-);
+); */
 
 const sendNotification = async (userId, payload) => {
   try {
