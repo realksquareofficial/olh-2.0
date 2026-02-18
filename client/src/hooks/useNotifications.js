@@ -4,22 +4,37 @@ import { requestForToken, onMessageListener } from '../firebase';
 
 const useNotifications = (user) => {
   const [token, setToken] = useState(null);
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(
+    typeof window !== 'undefined' && 'Notification' in window 
+      ? Notification.permission 
+      : 'default'
+  );
   const [loading, setLoading] = useState(false);
+  
+  const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
-    if (Notification.permission === 'granted') {
+    const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    setIsSupported(supported);
+
+    if (supported && Notification.permission === 'granted') {
       subscribe(); 
     }
     
-    onMessageListener().then(payload => {
-      console.log('Foreground Message:', payload);
-      const { title, body } = payload.notification;
-      new Notification(title, { body, icon: '/logo.png' });
-    });
+    if (supported) {
+      onMessageListener().then(payload => {
+        console.log('Foreground Message:', payload);
+        const { title, body } = payload?.notification || {};
+        if (title) {
+          new Notification(title, { body, icon: '/logo.png' });
+        }
+      }).catch(err => console.log('Message listener error:', err));
+    }
   }, []);
 
   const subscribe = async () => {
+    if (!isSupported) return false;
+    
     setLoading(true);
     try {
       const permission = await Notification.requestPermission();
@@ -57,7 +72,7 @@ const useNotifications = (user) => {
     }
   };
 
-  return { permission, token, subscribe, unsubscribe, loading };
+  return { isSupported, permission, token, subscribe, unsubscribe, loading };
 };
 
 export default useNotifications;
