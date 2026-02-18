@@ -4,12 +4,12 @@ const pushSubscriptionSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true
+  },
+  token: {
+    type: String,
     required: true,
     unique: true
-  },
-  subscription: {
-    type: Object,
-    required: true
   }
 }, { timestamps: true });
 
