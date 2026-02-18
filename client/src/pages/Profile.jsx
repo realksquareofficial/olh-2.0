@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
 import MaterialCard from '../components/MaterialCard';
-import NotificationSettings from '../components/NotificationSettings';
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -61,13 +60,13 @@ const Profile = () => {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden mb-8">
           <div className="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-          
+
           <div className="px-6 pb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-16 md:-mt-12">
               <div className={`w-32 h-32 rounded-2xl bg-gradient-to-br ${roleBadge.color} flex items-center justify-center text-white text-5xl font-bold shadow-2xl border-4 border-white dark:border-gray-800`}>
                 {user?.username?.charAt(0).toUpperCase() || 'U'}
               </div>
-              
+
               <div className="flex-1 md:mb-2">
                 <div className="flex items-center gap-2 mb-1">
                   <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
@@ -87,12 +86,12 @@ const Profile = () => {
                 <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{stats.uploadedCount}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Materials Uploaded</div>
               </div>
-              
+
               <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 rounded-xl p-4 text-center border border-pink-200 dark:border-pink-700">
                 <div className="text-3xl font-bold text-pink-600 dark:text-pink-400">{stats.favoritesCount}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Favorites</div>
               </div>
-              
+
               <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center border border-purple-200 dark:border-purple-700 col-span-2 md:col-span-1">
                 <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                   {uploadedMaterials.reduce((sum, m) => sum + (m.views || 0), 0)}
@@ -117,7 +116,7 @@ const Profile = () => {
               <span>Uploads</span>
               <span className="text-xs opacity-75">({uploadedMaterials.length})</span>
             </button>
-            
+
             <button
               onClick={() => setActiveTab('favorites')}
               className={`flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none text-xs md:text-base ${
@@ -141,6 +140,7 @@ const Profile = () => {
             >
               <span className="text-xl md:text-base">🔔</span>
               <span>Notifs</span>
+              <span className="text-xs opacity-75">(Soon)</span>
             </button>
           </div>
         </div>
@@ -194,8 +194,18 @@ const Profile = () => {
         )}
 
         {activeTab === 'notifications' && (
-          <div>
-            <NotificationSettings user={user} />
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+            <div className="text-6xl mb-4">🔔</div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Notifications are coming soon</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              You’ll be able to get alerts for approvals, rejections, and request updates in a future release.
+            </p>
+            <button
+              onClick={() => setActiveTab('uploaded')}
+              className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg"
+            >
+              Back to Uploads
+            </button>
           </div>
         )}
       </div>
