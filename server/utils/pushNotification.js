@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const PushSubscription = require('../models/PushSubscription');
 
 const serviceAccount = {
   "type": "service_account",
@@ -14,14 +15,17 @@ const serviceAccount = {
 };
 
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+  } catch (error) {
+    console.error('Firebase Admin Init Error:', error);
+  }
 }
 
 const sendNotification = async (userId, payload) => {
   try {
-    const PushSubscription = require('../models/PushSubscription');
     const subscriptions = await PushSubscription.find({ user: userId });
     
     if (!subscriptions.length) return;
@@ -39,18 +43,21 @@ const sendNotification = async (userId, payload) => {
       tokens: tokens
     };
 
-    const response = await admin.messaging().sendMulticast(message);
-    console.log('Successfully sent message:', response);
+    // This method forces HTTP v1 API and avoids the broken batch endpoint
+    const response = await admin.messaging().sendEachForMulticast(message);
     
     if (response.failureCount > 0) {
       const failedTokens = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           failedTokens.push(tokens[idx]);
+          console.error(`Token failed: ${tokens[idx]} - Error:`, resp.error);
         }
       });
-      console.log('Failed tokens:', failedTokens);
-      await PushSubscription.deleteMany({ token: { $in: failedTokens } });
+      
+      if (failedTokens.length > 0) {
+        await PushSubscription.deleteMany({ token: { $in: failedTokens } });
+      }
     }
   } catch (error) {
     console.error('Error sending notification:', error);
