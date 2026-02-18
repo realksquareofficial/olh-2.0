@@ -55,7 +55,7 @@ const upload = multer({
   }
 });
 
-router.delete('/:id', protect, adminOnly, deleteMaterial);
+router.delete('/:id', protect, deleteMaterial);
 router.patch('/:id/ignore-reports', protect, adminOnly, ignoreReports);
 
 router.post('/upload', protect, upload.single('material'), uploadMaterial);
