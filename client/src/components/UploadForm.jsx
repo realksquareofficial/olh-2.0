@@ -3,422 +3,411 @@ import axiosInstance from '../utils/axios';
 import { AuthContext } from '../context/AuthContext';
 
 const UploadForm = ({ onUploadSuccess, linkedRequest }) => {
-const { user } = useContext(AuthContext);
-const [formData, setFormData] = useState({ 
-title: '', 
-subject: '',
-description: '',
-source: 'others',
-materialType: 'other',
-regulationYear: ''
-});
-const [file, setFile] = useState(null);
-const [uploading, setUploading] = useState(false);
-const [uploadProgress, setUploadProgress] = useState(0);
-const [showProgressModal, setShowProgressModal] = useState(false);
-const [uploadStatus, setUploadStatus] = useState('');
-const [message, setMessage] = useState('');
-const [uploadedMaterial, setUploadedMaterial] = useState(null);
+  const { user } = useContext(AuthContext);
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    subject: '',
+    description: '',
+    source: 'others',
+    materialType: 'other',
+    regulationYear: ''
+  });
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [message, setMessage] = useState('');
+  const [uploadedMaterial, setUploadedMaterial] = useState(null);
 
-const isAdmin = user && ['admin', 'master'].includes(user.role);
+  const isAdmin = user && ['admin', 'master'].includes(user.role);
 
-useEffect(() => {
-if (linkedRequest) {
-setFormData({
-...formData,
-subject: linkedRequest.subject,
-regulationYear: linkedRequest.regulationYear || ''
-});
-}
-}, [linkedRequest]);
+  useEffect(() => {
+    if (linkedRequest) {
+      setFormData({
+        ...formData,
+        subject: linkedRequest.subject,
+        regulationYear: linkedRequest.regulationYear || ''
+      });
+    }
+  }, [linkedRequest]);
 
-const validateFile = (file) => {
-const allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'];
-const maxSize = 50 * 1024 * 1024;
+  const validateFile = (file) => {
+    const allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg', 'ppt', 'pptx'];
+    const maxSize = 50 * 1024 * 1024;
 
-const fileName = file.name.toLowerCase();
-const fileExtension = fileName.split('.').pop();
+    const fileName = file.name.toLowerCase();
+    const fileExtension = fileName.split('.').pop();
 
-if (!allowedExtensions.includes(fileExtension)) {
-return {
-valid: false,
-message: '❌ Invalid file type! Only PDF, PNG, JPG, JPEG, PPT, and PPTX files are allowed.'
-};
-}
+    if (!allowedExtensions.includes(fileExtension)) {
+      return {
+        valid: false,
+        message: 'Invalid file type! Only PDF, PNG, JPG, JPEG, PPT, and PPTX allowed.'
+      };
+    }
 
-if (file.size > maxSize) {
-return {
-valid: false,
-message: '❌ File size too large! Maximum size is 50MB.'
-};
-}
+    if (file.size > maxSize) {
+      return {
+        valid: false,
+        message: 'File too large! Maximum size is 50MB.'
+      };
+    }
 
-return { valid: true };
-};
+    return { valid: true };
+  };
 
-const handleSubmit = async (e) => {
-e.preventDefault();
-if (!file) {
-setMessage('❌ Please select a file to upload');
-return;
-}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setMessage('Please select a file to upload');
+      return;
+    }
 
-const validation = validateFile(file);
-if (!validation.valid) {
-setMessage(validation.message);
-return;
-}
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setMessage(validation.message);
+      return;
+    }
 
-const data = new FormData();
-data.append('title', formData.title);
-data.append('subject', formData.subject);
-data.append('description', formData.description);
-data.append('source', formData.source);
-data.append('regulationYear', formData.regulationYear);
-data.append('materialType', formData.materialType);
-data.append('material', file);
+    const data = new FormData();
+    data.append('title', formData.title);
+    data.append('subject', formData.subject);
+    data.append('description', formData.description);
+    data.append('source', formData.source);
+    data.append('regulationYear', formData.regulationYear);
+    data.append('materialType', formData.materialType);
+    data.append('material', file);
 
-if (linkedRequest) {
-data.append('linkedRequest', linkedRequest._id);
-}
+    if (linkedRequest) {
+      data.append('linkedRequest', linkedRequest._id);
+    }
 
-setUploading(true);
-setUploadProgress(0);
-setShowProgressModal(true);
-setUploadStatus('uploading');
-setMessage('');
+    setUploading(true);
+    setUploadProgress(0);
+    setShowProgressModal(true);
+    setUploadStatus('uploading');
+    setMessage('');
 
-try {
-const response = await axiosInstance.post('/api/materials/upload', data, {
-headers: { 
-'Content-Type': 'multipart/form-data'
-},
-onUploadProgress: (progressEvent) => {
-const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-setUploadProgress(percentCompleted);
-}
-});
+    try {
+      const response = await axiosInstance.post('/api/materials/upload', data, {
+        headers: { 
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadProgress(percentCompleted);
+        }
+      });
 
-setUploadedMaterial(response.data);
-setUploadStatus('success');
-setFormData({ title: '', subject: '', description: '', source: 'others', regulationYear: '', materialType: 'other' });
-setFile(null);
-document.getElementById('fileInput').value = '';
+      setUploadedMaterial(response.data);
+      setUploadStatus('success');
+      setFormData({ title: '', subject: '', description: '', source: 'others', regulationYear: '', materialType: 'other' });
+      setFile(null);
+      document.getElementById('fileInput').value = '';
 
-setTimeout(() => {
-window.location.reload();
-}, 3000);
-} catch (err) {
-console.error('Upload error:', err);
-setUploadStatus('error');
-const errorMessage = err.response?.data?.message || err.message || '❌ Upload failed';
-setMessage(errorMessage);
-} finally {
-setUploading(false);
-}
-};
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setUploadStatus('error');
+      const errorMessage = err.response?.data?.message || err.message || 'Upload failed';
+      setMessage(errorMessage);
+    } finally {
+      setUploading(false);
+    }
+  };
 
-const closeModal = () => {
-if (!uploading) {
-setShowProgressModal(false);
-setUploadProgress(0);
-setUploadStatus('');
-setUploadedMaterial(null);
-}
-};
+  const closeModal = () => {
+    if (!uploading) {
+      setShowProgressModal(false);
+      setUploadProgress(0);
+      setUploadStatus('');
+      setUploadedMaterial(null);
+    }
+  };
 
-return (
-<>
-<div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg p-6 border border-indigo-200 dark:border-gray-600 transition-all duration-300">
-<h2 className="text-2xl font-bold mb-4 text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
-Upload Material 📤
-</h2>
+  return (
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-tl-3xl rounded-br-3xl border-2 border-sky-300 dark:border-sky-700 p-8">
+        <h2 className="text-3xl font-black mb-6 text-gray-900 dark:text-white flex items-center gap-3 border-b-4 border-sky-600 dark:border-sky-400 pb-4">
+          <span>📤</span>
+          Upload Material
+        </h2>
 
-{linkedRequest && (
-<div className="mb-4 p-4 bg-orange-100 dark:bg-orange-900/30 border-2 border-orange-400 dark:border-orange-600 rounded-lg">
-<div className="flex items-center gap-2 mb-2">
-<span className="text-2xl">🤝</span>
-<h3 className="font-bold text-orange-900 dark:text-orange-300">Fulfilling Request</h3>
-</div>
-<p className="text-sm text-orange-800 dark:text-orange-200 mb-1">
-<span className="font-semibold">Requested by:</span> {linkedRequest.requestedBy?.username}
-</p>
-<p className="text-sm text-orange-800 dark:text-orange-200">
-<span className="font-semibold">Request details:</span> {linkedRequest.description || 'No additional details'}
-</p>
-</div>
-)}
+        {linkedRequest && (
+          <div className="mb-6 p-5 bg-orange-50 dark:bg-orange-950 border-l-4 border-orange-500">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🤝</span>
+              <h3 className="font-black text-orange-900 dark:text-orange-300 text-lg">Fulfilling Request</h3>
+            </div>
+            <p className="text-sm text-orange-800 dark:text-orange-200 mb-1">
+              <span className="font-bold">Requested by:</span> {linkedRequest.requestedBy?.username}
+            </p>
+            <p className="text-sm text-orange-800 dark:text-orange-200">
+              <span className="font-bold">Details:</span> {linkedRequest.description || 'No additional details'}
+            </p>
+          </div>
+        )}
 
-{isAdmin && (
-<div className="mb-4 p-3 bg-green-100 dark:bg-green-900/30 border-2 border-green-400 dark:border-green-600 rounded-lg">
-<p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
-<span className="text-lg">✅</span>
-<span className="font-semibold">Admin Privilege: Your uploads will be auto-approved</span>
-</p>
-</div>
-)}
+        {isAdmin && (
+          <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950 border-l-4 border-emerald-500">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300 flex items-center gap-2 font-bold">
+              <span className="text-lg">✅</span>
+              Admin privilege: Your uploads are auto-approved
+            </p>
+          </div>
+        )}
 
-{message && (
-<div className={`mb-4 px-4 py-3 rounded-lg ${
-message.includes('successful') 
-? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-400 dark:border-green-500' 
-: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-400 dark:border-red-500'
-}`}>
-{message}
-</div>
-)}
+        {message && (
+          <div className={`mb-6 px-5 py-4 border-l-4 font-semibold ${
+            message.includes('successful') 
+              ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border-emerald-500' 
+              : 'bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-300 border-red-500'
+          }`}>
+            {message}
+          </div>
+        )}
 
-<form onSubmit={handleSubmit} className="space-y-4">
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Title <span className="text-red-500">*</span>
-</label>
-<input
-type="text"
-placeholder="e.g., DSP Unit 3 Notes"
-required
-className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-colors"
-value={formData.title}
-onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-/>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📝 Required - Give your material a clear title</p>
-</div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., DSP Unit 3 Notes"
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-600 dark:focus:border-sky-400 transition-colors"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Subject <span className="text-red-500">*</span>
-{linkedRequest && <span className="text-xs text-orange-600 dark:text-orange-400 ml-2">(From Request - Read Only)</span>}
-</label>
-<input
-type="text"
-placeholder="e.g., Digital Signal Processing"
-required
-disabled={!!linkedRequest}
-className={`w-full px-4 py-2.5 border-2 rounded-lg focus:outline-none dark:text-white dark:placeholder-gray-400 transition-colors ${
-linkedRequest 
-? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20 cursor-not-allowed' 
-: 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500'
-}`}
-value={formData.subject}
-onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-/>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-{linkedRequest ? '🔒 Locked from the request' : '📚 Required - Specify the subject area'}
-</p>
-</div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              Subject <span className="text-red-500">*</span>
+              {linkedRequest && <span className="text-xs text-orange-600 dark:text-orange-400 ml-2 normal-case">(Locked from request)</span>}
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Digital Signal Processing"
+              required
+              disabled={!!linkedRequest}
+              className={`w-full px-4 py-3 border-2 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                linkedRequest 
+                  ? 'border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 cursor-not-allowed' 
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:border-sky-600 dark:focus:border-sky-400'
+              }`}
+              value={formData.subject}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+            />
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Regulation Year <span className="text-red-500">*</span>
-{linkedRequest && <span className="text-xs text-orange-600 dark:text-orange-400 ml-2">(From Request - Read Only)</span>}
-</label>
-<select
-value={formData.regulationYear}
-onChange={(e) => setFormData({ ...formData, regulationYear: e.target.value })}
-disabled={!!linkedRequest}
-className={`w-full px-4 py-2.5 border-2 rounded-lg focus:outline-none dark:text-white transition-colors ${
-linkedRequest 
-? 'border-orange-300 dark:border-orange-600 bg-orange-50 dark:bg-orange-900/20 cursor-not-allowed' 
-: 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500'
-}`}
-required
->
-<option value="">Select Regulation Year</option>
-<option value="2019">2019</option>
-<option value="2023">2023</option>
-</select>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-{linkedRequest ? '🔒 Locked from the request' : '📅 Required - Select regulation year'}
-</p>
-</div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              Regulation Year <span className="text-red-500">*</span>
+              {linkedRequest && <span className="text-xs text-orange-600 dark:text-orange-400 ml-2 normal-case">(Locked from request)</span>}
+            </label>
+            <select
+              value={formData.regulationYear}
+              onChange={(e) => setFormData({ ...formData, regulationYear: e.target.value })}
+              disabled={!!linkedRequest}
+              className={`w-full px-4 py-3 border-2 text-gray-900 dark:text-white focus:outline-none transition-colors ${
+                linkedRequest 
+                  ? 'border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950 cursor-not-allowed' 
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 focus:border-sky-600 dark:focus:border-sky-400'
+              }`}
+              required
+            >
+              <option value="">Select Regulation Year</option>
+              <option value="2019">2019</option>
+              <option value="2023">2023</option>
+            </select>
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Material Type
-</label>
-<select
-value={formData.materialType}
-onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
-className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
->
-<option value="other">Other</option>
-<option value="notes">📝 Notes</option>
-<option value="question-paper">📄 Question Paper</option>
-<option value="syllabus">📋 Syllabus</option>
-<option value="reference-book">📚 Reference Book</option>
-</select>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📄 Optional - Type of material you're uploading</p>
-</div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              Material Type
+            </label>
+            <select
+              value={formData.materialType}
+              onChange={(e) => setFormData({ ...formData, materialType: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-600 dark:focus:border-sky-400"
+            >
+              <option value="other">Other</option>
+              <option value="notes">Notes</option>
+              <option value="question-paper">Question Paper</option>
+              <option value="syllabus">Syllabus</option>
+              <option value="reference-book">Reference Book</option>
+            </select>
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Source <span className="text-red-500">*</span>
-</label>
-<div className="flex flex-wrap gap-4">
-<label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-700 px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-all">
-<input
-type="radio"
-name="source"
-value="internet"
-checked={formData.source === 'internet'}
-onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-required
-/>
-<span className="text-gray-700 dark:text-gray-300 font-medium">🌐 Internet</span>
-</label>
+          <div>
+            <label className="block text-sm font-bold mb-3 text-gray-900 dark:text-white uppercase tracking-wide">
+              Source <span className="text-red-500">*</span>
+            </label>
+            <div className="flex flex-wrap gap-3">
+              <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-900 px-5 py-3 border-2 border-gray-300 dark:border-gray-600 hover:border-sky-600 dark:hover:border-sky-400 transition-all">
+                <input
+                  type="radio"
+                  name="source"
+                  value="internet"
+                  checked={formData.source === 'internet'}
+                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                  className="w-4 h-4 text-sky-600 focus:ring-sky-500"
+                  required
+                />
+                <span className="text-gray-900 dark:text-white font-bold text-sm">🌐 Internet</span>
+              </label>
 
-<label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-700 px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-all">
-<input
-type="radio"
-name="source"
-value="written"
-checked={formData.source === 'written'}
-onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-required
-/>
-<span className="text-gray-700 dark:text-gray-300 font-medium">✍️ Written Material</span>
-</label>
+              <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-900 px-5 py-3 border-2 border-gray-300 dark:border-gray-600 hover:border-sky-600 dark:hover:border-sky-400 transition-all">
+                <input
+                  type="radio"
+                  name="source"
+                  value="written"
+                  checked={formData.source === 'written'}
+                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                  className="w-4 h-4 text-sky-600 focus:ring-sky-500"
+                  required
+                />
+                <span className="text-gray-900 dark:text-white font-bold text-sm">✍️ Written</span>
+              </label>
 
-<label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-700 px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-all">
-<input
-type="radio"
-name="source"
-value="others"
-checked={formData.source === 'others'}
-onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-className="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-required
-/>
-<span className="text-gray-700 dark:text-gray-300 font-medium">📦 Others</span>
-</label>
-</div>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📍 Required - Where did you get this material from?</p>
-</div>
+              <label className="flex items-center gap-2 cursor-pointer bg-white dark:bg-gray-900 px-5 py-3 border-2 border-gray-300 dark:border-gray-600 hover:border-sky-600 dark:hover:border-sky-400 transition-all">
+                <input
+                  type="radio"
+                  name="source"
+                  value="others"
+                  checked={formData.source === 'others'}
+                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                  className="w-4 h-4 text-sky-600 focus:ring-sky-500"
+                  required
+                />
+                <span className="text-gray-900 dark:text-white font-bold text-sm">📦 Others</span>
+              </label>
+            </div>
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Description <span className="text-gray-400 text-xs">(Optional)</span>
-</label>
-<textarea
-placeholder="e.g., Complete notes covering Fourier Transform, Z-Transform, and Digital Filters with solved examples..."
-rows="3"
-className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-colors resize-none"
-value={formData.description}
-onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-/>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">💬 Optional - Add details about the material you're uploading</p>
-</div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              Description <span className="text-gray-500 text-xs normal-case">(Optional)</span>
+            </label>
+            <textarea
+              placeholder="Add details about the material..."
+              rows="3"
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-600 dark:focus:border-sky-400 transition-colors resize-none"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
 
-<div>
-<label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
-Material File <span className="text-red-500">*</span>
-</label>
-<input
-id="fileInput"
-type="file"
-accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
-required
-className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white 
-file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white file:font-semibold file:cursor-pointer hover:file:bg-indigo-700 transition-colors"
-onChange={(e) => setFile(e.target.files[0])}
-/>
-<p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📄 Required - PDF, PNG, JPG, JPEG, PPT, or PPTX (Max 50MB)</p>
-</div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-900 dark:text-white uppercase tracking-wide">
+              File <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="fileInput"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.ppt,.pptx"
+              required
+              className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:border-sky-600 dark:focus:border-sky-400 file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-sky-600 dark:file:bg-sky-500 file:text-white file:font-bold file:cursor-pointer hover:file:bg-sky-700 dark:hover:file:bg-sky-600"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PDF, PNG, JPG, JPEG, PPT, or PPTX • Max 50MB</p>
+          </div>
 
-<div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-3">
-<p className="text-sm text-yellow-800 dark:text-yellow-300 flex items-center gap-2">
-<span className="text-lg">⚠️</span>
-<span>Fields marked with <span className="text-red-500 font-bold">*</span> are required</span>
-</p>
-</div>
+          <div className="bg-amber-50 dark:bg-amber-950 border-l-4 border-amber-500 p-4">
+            <p className="text-sm text-amber-800 dark:text-amber-300 font-semibold">
+              ⚠️ Fields marked with <span className="text-red-500">*</span> are required
+            </p>
+          </div>
 
-<button
-type="submit"
-disabled={uploading}
-className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 shadow-lg"
->
-{uploading ? '⏳ Uploading...' : linkedRequest ? '🤝 Upload & Fulfill Request' : '🚀 Upload Material'}
-</button>
-</form>
-</div>
+          <button
+            type="submit"
+            disabled={uploading}
+            className="w-full bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white font-black py-4 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 shadow-lg text-lg"
+          >
+            {uploading ? 'Uploading...' : linkedRequest ? '🤝 Upload & Fulfill Request' : '🚀 Upload Material'}
+          </button>
+        </form>
+      </div>
 
-{showProgressModal && (
-<div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-<div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full border-2 border-indigo-500 dark:border-indigo-400">
-<div className="text-center">
-{uploadStatus === 'uploading' && (
-<>
-<div className="text-6xl mb-4 animate-bounce">📤</div>
-<h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Uploading...</h3>
-<p className="text-gray-600 dark:text-gray-400 mb-6">Please wait while we upload your material</p>
+      {showProgressModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 max-w-md w-full border-4 border-sky-400">
+            <div className="text-center">
+              {uploadStatus === 'uploading' && (
+                <>
+                  <div className="text-6xl mb-4 animate-bounce">📤</div>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">Uploading</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 font-semibold">Please wait...</p>
 
-<div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 mb-4 overflow-hidden">
-<div 
-className="bg-gradient-to-r from-indigo-600 to-purple-600 h-6 rounded-full transition-all duration-300 flex items-center justify-center text-white text-sm font-bold"
-style={{ width: `${uploadProgress}%` }}
->
-{uploadProgress}%
-</div>
-</div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 h-8 mb-4 overflow-hidden">
+                    <div 
+                      className="bg-sky-600 dark:bg-sky-500 h-8 transition-all duration-300 flex items-center justify-center text-white text-sm font-black"
+                      style={{ width: `${uploadProgress}%` }}
+                    >
+                      {uploadProgress}%
+                    </div>
+                  </div>
 
-<p className="text-sm text-gray-500 dark:text-gray-400">
-{uploadProgress < 50 ? 'Starting upload...' : uploadProgress < 100 ? 'Almost there...' : 'Processing...'}
-</p>
-</>
-)}
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-semibold">
+                    {uploadProgress < 50 ? 'Starting...' : uploadProgress < 100 ? 'Almost there...' : 'Processing...'}
+                  </p>
+                </>
+              )}
 
-{uploadStatus === 'success' && uploadedMaterial && (
-<>
-<div className="text-6xl mb-4 animate-pulse">✅</div>
-<h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">Upload Successful!</h3>
-<p className="text-gray-800 dark:text-gray-200 font-semibold mb-2">{uploadedMaterial.title}</p>
-<p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-Status: <span className={`font-bold ${
-uploadedMaterial.verificationStatus === 'approved' 
-? 'text-green-600 dark:text-green-400' 
-: 'text-yellow-600 dark:text-yellow-400'
-}`}>
-{uploadedMaterial.verificationStatus.toUpperCase()}
-</span>
-</p>
+              {uploadStatus === 'success' && uploadedMaterial && (
+                <>
+                  <div className="text-6xl mb-4">✅</div>
+                  <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mb-2">Upload Successful!</h3>
+                  <p className="text-gray-900 dark:text-white font-bold mb-2">{uploadedMaterial.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 font-semibold">
+                    Status: <span className={`font-black ${
+                      uploadedMaterial.verificationStatus === 'approved' 
+                        ? 'text-emerald-600 dark:text-emerald-400' 
+                        : 'text-amber-600 dark:text-amber-400'
+                    }`}>
+                      {uploadedMaterial.verificationStatus.toUpperCase()}
+                    </span>
+                  </p>
 
-{uploadedMaterial.verificationStatus === 'approved' ? (
-<div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-600 rounded-lg p-4">
-<p className="text-sm text-green-800 dark:text-green-300">
-✨ Your material is now live and visible to everyone! 🚀
-</p>
-</div>
-) : (
-<div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-600 rounded-lg p-4">
-<p className="text-sm text-yellow-800 dark:text-yellow-300">
-⏳ Your material is pending admin approval. You'll be notified once reviewed!
-</p>
-</div>
-)}
-</>
-)}
+                  {uploadedMaterial.verificationStatus === 'approved' ? (
+                    <div className="bg-emerald-50 dark:bg-emerald-950 border-l-4 border-emerald-500 p-4">
+                      <p className="text-sm text-emerald-800 dark:text-emerald-300 font-bold">
+                        Your material is now live! 🚀
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="bg-amber-50 dark:bg-amber-950 border-l-4 border-amber-500 p-4">
+                      <p className="text-sm text-amber-800 dark:text-amber-300 font-bold">
+                        Pending admin approval ⏳
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
 
-{uploadStatus === 'error' && (
-<>
-<div className="text-6xl mb-4">❌</div>
-<h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">Upload Failed!</h3>
-<p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
-<button
-onClick={closeModal}
-className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
->
-Close
-</button>
-</>
-)}
-</div>
-</div>
-</div>
-)}
-</>
-);
+              {uploadStatus === 'error' && (
+                <>
+                  <div className="text-6xl mb-4">❌</div>
+                  <h3 className="text-2xl font-black text-red-600 dark:text-red-400 mb-2">Upload Failed</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 font-semibold">{message}</p>
+                  <button
+                    onClick={closeModal}
+                    className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold transition-colors"
+                  >
+                    Close
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default UploadForm;

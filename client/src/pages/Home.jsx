@@ -41,7 +41,6 @@ const Home = () => {
     }
   }, [location.state, requests]);
 
-  // Listen to events from Navbar buttons
   useEffect(() => {
     const handleOpenUpload = () => {
       setSelectedRequest(null);
@@ -103,7 +102,6 @@ const Home = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Desktop Floating Buttons - Only visible on desktop */}
       {user && (
         <>
           <button
@@ -111,37 +109,35 @@ const Home = () => {
               setSelectedRequest(null);
               setShowUploadModal(true);
             }}
-            className="hidden md:flex fixed bottom-24 right-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 z-50 items-center gap-2"
-            title="Upload Material"
+            className="hidden md:flex fixed bottom-24 right-8 bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white px-6 py-4 rounded-tl-2xl rounded-br-2xl shadow-lg transition-all duration-200 hover:-translate-y-1 z-50 items-center gap-2 font-bold"
           >
-            <span className="text-2xl">📤</span>
-            <span className="font-bold">Upload</span>
+            <span className="text-xl">📤</span>
+            Upload
           </button>
 
           <button
             onClick={() => setShowRequestModal(true)}
-            className="hidden md:flex fixed bottom-8 right-8 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 z-50 items-center gap-2"
-            title="Request Material"
+            className="hidden md:flex fixed bottom-8 right-8 bg-orange-600 hover:bg-orange-700 dark:bg-orange-500 dark:hover:bg-orange-600 text-white px-6 py-4 rounded-tl-2xl rounded-br-2xl shadow-lg transition-all duration-200 hover:-translate-y-1 z-50 items-center gap-2 font-bold"
           >
-            <span className="text-2xl">📝</span>
-            <span className="font-bold">Request</span>
+            <span className="text-xl">📝</span>
+            Request
           </button>
         </>
       )}
 
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 olh-theme:bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-2xl border-2 border-sky-200 dark:border-sky-900">
             <button
               onClick={() => {
                 setShowUploadModal(false);
                 setSelectedRequest(null);
               }}
-              className="absolute top-4 right-4 text-3xl hover:text-red-500 transition-colors z-10"
+              className="absolute top-6 right-6 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors text-2xl font-bold z-10"
             >
-              ❌
+              ✕
             </button>
-            <div className="p-6">
+            <div className="p-8">
               <UploadForm onUploadSuccess={handleUploadSuccess} linkedRequest={selectedRequest} />
             </div>
           </div>
@@ -149,15 +145,15 @@ const Home = () => {
       )}
 
       {showRequestModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 olh-theme:bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative shadow-2xl border-2 border-orange-200 dark:border-orange-900">
             <button
               onClick={() => setShowRequestModal(false)}
-              className="absolute top-4 right-4 text-3xl hover:text-red-500 transition-colors z-10"
+              className="absolute top-6 right-6 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors text-2xl font-bold z-10"
             >
-              ❌
+              ✕
             </button>
-            <div className="p-6">
+            <div className="p-8">
               <RequestForm onRequestSuccess={handleRequestSuccess} />
             </div>
           </div>
@@ -166,32 +162,32 @@ const Home = () => {
 
       <SearchBar materials={materials} setFilteredMaterials={setFilteredMaterials} />
 
-      <div className="mb-6">
-        <div className={`grid ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} gap-3 md:flex md:gap-4 md:border-b md:border-gray-300 md:dark:border-gray-700 olh-theme:md:border-olh-primary`}>
+      <div className="mb-8">
+        <div className={`grid ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'} gap-2 md:flex md:gap-6`}>
           <button
             onClick={() => setActiveTab('public')}
-            className={`flex flex-col md:flex-row items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none ${
+            className={`flex items-center justify-center gap-2 px-5 py-4 font-bold transition-all duration-200 ${
               activeTab === 'public'
-                ? 'bg-indigo-500 text-white md:bg-transparent md:border-b-4 md:border-indigo-600 md:text-indigo-600 md:dark:text-indigo-400 olh-theme:md:text-olh-primary'
-                : 'bg-gray-100 dark:bg-gray-700 olh-theme:bg-gray-200 text-gray-600 dark:text-gray-400 olh-theme:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 olh-theme:hover:bg-gray-300 md:bg-transparent md:hover:text-indigo-600 md:dark:hover:text-indigo-400 olh-theme:md:hover:text-olh-primary'
+                ? 'bg-sky-600 dark:bg-sky-500 text-white rounded-xl md:rounded-none md:bg-transparent md:text-sky-600 dark:md:text-sky-400 md:border-b-4 md:border-sky-600 dark:md:border-sky-400'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl md:rounded-none md:bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-sky-600 dark:md:hover:text-sky-400'
             }`}
           >
-            <span className="text-2xl md:text-base">📚</span>
+            <span className="text-lg">📚</span>
             <span className="text-sm md:text-base">Public Feed</span>
           </button>
 
           <button
             onClick={() => setActiveTab('requests')}
-            className={`flex flex-col md:flex-row items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 relative rounded-lg md:rounded-none ${
+            className={`flex items-center justify-center gap-2 px-5 py-4 font-bold transition-all duration-200 relative ${
               activeTab === 'requests'
-                ? 'bg-orange-500 text-white md:bg-transparent md:border-b-4 md:border-orange-600 md:text-orange-600 md:dark:text-orange-400 olh-theme:md:text-orange-600'
-                : 'bg-gray-100 dark:bg-gray-700 olh-theme:bg-gray-200 text-gray-600 dark:text-gray-400 olh-theme:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 olh-theme:hover:bg-gray-300 md:bg-transparent md:hover:text-orange-600 md:dark:hover:text-orange-400 olh-theme:md:hover:text-orange-600'
+                ? 'bg-orange-600 dark:bg-orange-500 text-white rounded-xl md:rounded-none md:bg-transparent md:text-orange-600 dark:md:text-orange-400 md:border-b-4 md:border-orange-600 dark:md:border-orange-400'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl md:rounded-none md:bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-orange-600 dark:md:hover:text-orange-400'
             }`}
           >
-            <span className="text-2xl md:text-base">📝</span>
+            <span className="text-lg">📝</span>
             <span className="text-sm md:text-base">Requests</span>
             {requests.length > 0 && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                 {requests.length}
               </span>
             )}
@@ -201,29 +197,29 @@ const Home = () => {
             <>
               <button
                 onClick={() => setActiveTab('pending')}
-                className={`flex flex-col md:flex-row items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 relative rounded-lg md:rounded-none ${
+                className={`flex items-center justify-center gap-2 px-5 py-4 font-bold transition-all duration-200 relative ${
                   activeTab === 'pending'
-                    ? 'bg-yellow-500 text-white md:bg-transparent md:border-b-4 md:border-yellow-500 md:text-yellow-600 md:dark:text-yellow-400 olh-theme:md:text-yellow-600'
-                    : 'bg-gray-100 dark:bg-gray-700 olh-theme:bg-gray-200 text-gray-600 dark:text-gray-400 olh-theme:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 olh-theme:hover:bg-gray-300 md:bg-transparent md:hover:text-yellow-600 md:dark:hover:text-yellow-400 olh-theme:md:hover:text-yellow-600'
+                    ? 'bg-amber-500 text-white rounded-xl md:rounded-none md:bg-transparent md:text-amber-600 dark:md:text-amber-400 md:border-b-4 md:border-amber-500'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl md:rounded-none md:bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-amber-600 dark:md:hover:text-amber-400'
                 }`}
               >
-                <span className="text-2xl md:text-base">📋</span>
+                <span className="text-lg">📋</span>
                 <span className="text-sm md:text-base">Pending</span>
                 {pendingMaterials.length > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {pendingMaterials.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('reports')}
-                className={`flex flex-col md:flex-row items-center justify-center gap-2 px-4 py-4 md:py-3 font-semibold transition-all duration-200 rounded-lg md:rounded-none ${
+                className={`flex items-center justify-center gap-2 px-5 py-4 font-bold transition-all duration-200 ${
                   activeTab === 'reports'
-                    ? 'bg-red-500 text-white md:bg-transparent md:border-b-4 md:border-red-500 md:text-red-600 md:dark:text-red-400 olh-theme:md:text-red-600'
-                    : 'bg-gray-100 dark:bg-gray-700 olh-theme:bg-gray-200 text-gray-600 dark:text-gray-400 olh-theme:text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 olh-theme:hover:bg-gray-300 md:bg-transparent md:hover:text-red-600 md:dark:hover:text-red-400 olh-theme:md:hover:text-red-600'
+                    ? 'bg-red-500 text-white rounded-xl md:rounded-none md:bg-transparent md:text-red-600 dark:md:text-red-400 md:border-b-4 md:border-red-500'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl md:rounded-none md:bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 md:hover:bg-transparent md:hover:text-red-600 dark:md:hover:text-red-400'
                 }`}
               >
-                <span className="text-2xl md:text-base">🚩</span>
+                <span className="text-lg">🚩</span>
                 <span className="text-sm md:text-base">Reports</span>
               </button>
             </>
@@ -234,14 +230,15 @@ const Home = () => {
       {activeTab === 'public' && (
         <div>
           {filteredMaterials.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-600 dark:text-gray-400 olh-theme:text-gray-600 text-xl mb-4">No materials found</p>
+            <div className="text-center py-20">
+              <div className="text-7xl mb-6 opacity-50">📚</div>
+              <p className="text-gray-600 dark:text-gray-400 text-2xl font-bold mb-6">No materials found</p>
               {user && (
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 olh-theme:bg-olh-primary olh-theme:hover:bg-olh-hover text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
+                  className="bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white px-8 py-4 rounded-xl font-bold transition-all duration-200 hover:-translate-y-1 shadow-lg"
                 >
-                  Be the first to upload! 📤
+                  Be the first to upload
                 </button>
               )}
             </div>
@@ -258,14 +255,15 @@ const Home = () => {
       {activeTab === 'requests' && (
         <div>
           {requests.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-600 dark:text-gray-400 olh-theme:text-gray-600 text-xl mb-4">No active requests</p>
+            <div className="text-center py-20">
+              <div className="text-7xl mb-6 opacity-50">📝</div>
+              <p className="text-gray-600 dark:text-gray-400 text-2xl font-bold mb-6">No active requests</p>
               {user && (
                 <button
                   onClick={() => setShowRequestModal(true)}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-xl font-bold transition-all duration-200 hover:-translate-y-1 shadow-lg"
                 >
-                  Create First Request! 📝
+                  Create first request
                 </button>
               )}
             </div>
@@ -282,7 +280,10 @@ const Home = () => {
       {activeTab === 'pending' && isAdmin && (
         <div>
           {pendingMaterials.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400 olh-theme:text-gray-600 text-center py-8">No pending materials 😎</p>
+            <div className="text-center py-20">
+              <div className="text-7xl mb-6">✅</div>
+              <p className="text-gray-600 dark:text-gray-400 text-2xl font-bold">All caught up</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pendingMaterials.map((material) => (
@@ -300,9 +301,7 @@ const Home = () => {
         </div>
       )}
 
-      {activeTab === 'reports' && isAdmin && (
-        <Reports />
-      )}
+      {activeTab === 'reports' && isAdmin && <Reports />}
     </div>
   );
 };
